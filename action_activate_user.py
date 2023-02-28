@@ -59,24 +59,14 @@ def func_(emp):
     if(elm):
         print("DETECTED")
         emp.moveto(elm)
-        # emp.click(elm)
+        emp.click(elm)
     else:
         print("NOT DETECTED")
 emp.promise(_func=func_, _tooltip="find element in region")
 
-print(x, y, xx, yy)
-
-exit()
-# #
-# def func_(emp):
-#     #check for types of user
-#     elm = emp.locate(element_user_activate_btn, _confidence=0.9)
-#     emp.click(elm)
-# emp.promise(_func=func_, _tooltip="click on activate")
-
-# #
-# def func_(emp):
-#     #check for types of user
-#     elm = emp.locate(element_user_activate_accept, _confidence=0.9)
-#     emp.click(elm)
-# emp.promise(_func=func_, _tooltip="click accept")
+#
+def func_(emp):
+    #check for types of user
+    elm = emp.locate(element_user_activate_accept, _confidence=0.9)
+    emp.click(elm)
+emp.promise(_func=func_, _tooltip="click accept")

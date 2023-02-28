@@ -10,6 +10,8 @@ emp.set_failsafe(False)
 emp.set_delay(0.5)
 show = emp.show
 
+sleep(1)
+
 #--------------------------------
 def func_(emp):
     show("importing image...")

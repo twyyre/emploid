@@ -98,10 +98,10 @@ class Emploid:
     def keyboard_hotkey(self, *_keys):
         self.pa.hotkey(*_keys) 
 
-    def locate(self, _elm, _confidence=0.6, _grayscale=True):
+    def locate(self, _elm, _confidence=0.9, _grayscale=True):
         return self.pa.locateOnScreen(_elm, confidence=_confidence, grayscale=_grayscale)#, region=(0,0, 300, 400))
     
-    def locate_in_region(self, _elm, _x, _y, _xx, _yy, _confidence=0.6, _grayscale=True):
+    def locate_in_region(self, _elm, _x, _y, _xx, _yy, _confidence=0.9, _grayscale=True):
         return self.pa.locateOnScreen(_elm, confidence=_confidence, grayscale=_grayscale, region=[_x, _y, _xx, _yy])
         
     def locate_all(self, _elm, _confidence=0.9, _grayscale=True):
@@ -232,10 +232,11 @@ class Emploid:
 
     def promise(self, _func, *_args, _tooltip="<no tooltip>", _tries=15, _delay=2, _fullerror=True, _noerror=False, _noprint=False):
 
-        print(f"----------------({_tooltip})----------------")
 
         if(_tooltip==""):
             _tooltip="<no tooltip>"
+
+        print(f"----------------({_tooltip})----------------")
 
         if(not _tries==None):
             if(_tries < 1):
@@ -269,7 +270,6 @@ class Emploid:
                     else:
                         print(_tooltip + " failed ("+str(_tries)+f". . .) {_str}")
 
-                # self.driver.save_screenshot(self.screenshot_name)
                 sleep(_delay)
                 state = False
         return state

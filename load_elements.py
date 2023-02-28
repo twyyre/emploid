@@ -70,7 +70,7 @@ element_user_change_password_confirm_btn = emp.import_image(_dir="user_managemen
 element_user_copy_new_password = emp.import_image(_dir="user_management/user_change_password/user_copy_new_password.png")
 
 #user activate
-element_user_activate_btn= emp.import_image(_dir="user_management/user_activate/activate_btn.png")
+element_user_activate_btn = emp.import_image(_dir="user_management/user_activate/activate_btn.png")
 element_user_deactivate_btn= emp.import_image(_dir="user_management/user_activate/deactivate_btn.png")
 element_user_activate_accept= emp.import_image(_dir="user_management/user_activate/accept.png")
 element_user_activision_state= emp.import_image(_dir="user_management/user_activate/activision_state.png")
@@ -97,6 +97,35 @@ element_customer_account_number_inpt = emp.import_image(_dir="customer_managemen
 element_customer_non_branch_inpt = emp.import_image(_dir="customer_management/customer_add/non_branch_inpt.png")
 
 element_customer_error_account_number_is_not_valid = emp.import_image(_dir="customer_management/customer_add/errors/accountNumberIsNotValid.png")
+
+element_customer_a3mal_company_name_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/company_name_inpt.png")
+
+element_customer_a3mal_commercial_record_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/commerical_record_inpt.png")
+
+element_customer_a3mal_license_number_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/license_number_inpt.png")
+
+element_customer_a3mal_license_date_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/license_date_inpt.png")
+
+element_customer_a3mal_account_type_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/account_type_inpt.png")
+
+element_customer_a3mal_branch_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/branch_inpt.png")
+
+element_customer_a3mal_branch_id_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/branch_id_inpt.png")
+
+element_customer_a3mal_account_desc_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/account_desc_inpt.png")
+
+element_customer_a3mal_add_btn = emp.import_image(_dir="customer_management/customer_a3mal_add/add_btn.png")
+
+element_customer_a3mal_next_btn2 = emp.import_image(_dir="customer_management/customer_a3mal_add/next_btn.png")
+
+element_customer_a3mal_license_date_entry_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/license_date_entry_inpt.png")
+
+element_customer_a3mal_license_date_entry_btn = emp.import_image(_dir="customer_management/customer_a3mal_add/license_date_entry_btn.png")
+
+element_customer_a3mal_hasanan = emp.import_image(_dir="customer_management/customer_a3mal_add/hasanan.png")
+
+
+
 
 
 

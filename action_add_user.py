@@ -11,13 +11,6 @@ emp.set_failsafe(False)
 emp.set_delay(0.5)
 show = emp.show
 
-#generate email for email confirmation
-# def func_(emp):
-#     global email
-#     email = emp.email_generate()
-#     show(f"generated email: {email.address}")
-# emp.promise(_func=func_, _tooltip="generate email for email confirmation")
-
 name = "واحد أحول"
 username = "wahedahwal04"
 email = "itameioss@gmail.com"#email.address

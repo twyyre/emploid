@@ -34,6 +34,7 @@ except Exception as e:
     print(e)
     input()
     exit()
+exit()
 
 #
 try:
@@ -44,4 +45,3 @@ except Exception as e:
     input()
     exit()
 show("FINISHED")
-exit()
