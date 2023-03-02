@@ -71,9 +71,10 @@ element_user_copy_new_password = emp.import_image(_dir="user_management/user_cha
 
 #user activate
 element_user_activate_btn = emp.import_image(_dir="user_management/user_activate/activate_btn.png")
-element_user_deactivate_btn= emp.import_image(_dir="user_management/user_activate/deactivate_btn.png")
-element_user_activate_accept= emp.import_image(_dir="user_management/user_activate/accept.png")
-element_user_activision_state= emp.import_image(_dir="user_management/user_activate/activision_state.png")
+element_user_deactivate_btn = emp.import_image(_dir="user_management/user_activate/deactivate_btn.png")
+element_user_activate_accept = emp.import_image(_dir="user_management/user_activate/accept.png")
+element_user_activision_state = emp.import_image(_dir="user_management/user_activate/activision_state.png")
+element_user_activate_note_inpt = emp.import_image(_dir="user_management/user_activate/note_inpt.png")
 
 #customer add 
 element_customer_branch_inpt = emp.import_image(_dir="customer_management/customer_add/branch_inpt.png")
@@ -123,20 +124,3 @@ element_customer_a3mal_license_date_entry_inpt = emp.import_image(_dir="customer
 element_customer_a3mal_license_date_entry_btn = emp.import_image(_dir="customer_management/customer_a3mal_add/license_date_entry_btn.png")
 
 element_customer_a3mal_hasanan = emp.import_image(_dir="customer_management/customer_a3mal_add/hasanan.png")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

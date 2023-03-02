@@ -14,34 +14,25 @@ def func_(emp):
     emp.chrome_run(_url="http://10.10.20.44:4455/", _maximized=False)
 emp.promise(_func=func_, _tooltip="open chrome window")
 
-sleep(2)
+#
+from actions.action_login import action_login
+action_login(emp, _username="shewa", _password="11111111")
 
 #
-try:
-    import action_login
-    pass
-except Exception as e:
-    print("login action failed")
-    print(e)
-    input()
-    exit()
+from actions.action_add_user import action_add_user
+action_add_user(
+    emp,
+    _name="أيوب المنتصر", 
+    _username="ayoubalmontaser01", 
+    _email="ab@gmail.com", 
+    _mobile="0910953021", 
+    _password="09090909", 
+    _type=1
+)
 
 #
-try:
-    import action_add_user
-except Exception as e:
-    print("add user action failed")
-    print(e)
-    input()
-    exit()
+from actions.action_logout import action_logout
+action_logout(emp)
 
-#
-try:
-    import action_logout
-except Exception as e:
-    print("add user action failed")
-    print(e)
-    input()
-    exit()
 show("FINISHED")
 exit()

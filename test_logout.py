@@ -18,9 +18,20 @@ emp.chrome_run(_url="http://10.10.20.44:4455/")
 try:
     from actions.action_login import action_login
     action_login(emp, _username="shewa", _password="11111111")
+    pass
 except Exception as e:
     print("login action failed")
     print(e)
+    input()
+    exit()
+#
+try:
+    from actions.action_logout import action_logout
+    action_logout(emp)
+except Exception as e:
+    print("login action failed")
+    print(e)
+    input()
     exit()
 
 show("FINISHED")

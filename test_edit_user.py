@@ -16,31 +16,14 @@ emp.promise(_func=func_, _tooltip="open chrome window")
 
 sleep(2)
 
-#
-try:
-    import action_login
-    pass
-except Exception as e:
-    print("login action")
-    print(e)
-    input()
-    exit()
-#
-try:
-    import action_search_user
-except Exception as e:
-    print("add user action")
-    print(e)
-    input()
-    exit()
-#
-try:
-    import action_edit_user
-except Exception as e:
-    print("add user action")
-    print(e)
-    input()
-    exit()
+from actions.action_login import action_login
+
+
+from actions.action_search_user import action_search_user
+
+
+from actions.action_edit_user action_edit_user
+
 
 show("FINISHED")
 exit()

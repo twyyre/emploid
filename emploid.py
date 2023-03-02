@@ -1,14 +1,14 @@
 from os import listdir
 from time import sleep
+
 class Emploid:
 
     def __init__(self) -> None:
-
         import pyautogui as pa
         import numpy as np
         import cv2 as cv
         from api import API
-        from scribe import Scribe
+        from modules.emp_scribe import Scribe
 
         self.pa = pa
         self.cv = cv
@@ -56,36 +56,122 @@ class Emploid:
     def convert_to_grayscale(self, _img):
         return self.cv.cvtColor(_img, self.cv.COLOR_BGR2GRAY)
 
-    def import_image(self, _dir, _internal=True):
+    def import_image(self, _dir, _internal=True, _report=True):
         if(_internal):
             path = self.internal_path+_dir
-            return self.cv.imread(path)
+            import numpy as np
+            elm = self.cv.imread(path)
+            if(elm is not None):
+                if(_report):
+                    # print(f"element ({_dir}) IMPROTED successfully")
+                    pass
+                return elm
+            else:
+                if(_report):
+                    print(f"element ({_dir}) FAILED to import")
+                    pass
         else:
-            return self.cv.imread(_dir)
+            return Exception("non-internal paths are not currently suppoorted")
+        
+    def promise_element(self, _ent):
+
+        import pyscreeze
+        a = isinstance(_ent, pyscreeze.Box)
+
+        if(a):
+            return _ent
+        else:
+            def func_(self):
+
+                print("locating element")
+                elm = self.locate(_ent)
+
+                if(elm):
+                    print("detected")
+                    return elm
+                else:
+                    print("could not detect element")
+                    return False
+            return self.promise(_func=func_, _tooltip=f"promising element...")
 
     def press(self):
         'left' 'middle' 'right'
         self.pa.click()
         
-    def click(self, _elm):
-        elm = _elm
-        self.pa.click(elm)
+    def click(self, _elm, _tooltip="Click", _tries=3, _delay=1, _exit=False):
+        def func_(self):
+            elm = _elm
+            elm = self.promise_element(_elm)
+            if(elm):
+                self.pa.click(elm)
+                return True
+            else:
+                raise Exception("could not click element")
+        return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def lclick(self, _elm):
-        self.pa.leftClick(_elm)
+    def lclick(self, _elm, _tooltip="Left Click", _tries=3, _delay=1, _exit=False):
+        def func_(self):
+            elm = _elm
+            elm = self.promise_element(_elm)
+            if(elm):
+                self.pa.leftClick(elm)
+                return True
+            else:
+                raise Exception("could not left click element")
+        return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def rclick(self, _elm):
-        self.pa.rightClick(_elm)
+    def rclick(self, _elm, _tooltip="Right Click", _tries=3, _delay=1, _exit=False):
+        def func_(self):
+            elm = _elm
+            elm = self.promise_element(_elm)
+            if(elm):
+                self.pa.rightClick(elm)
+                return True
+            else:
+                raise Exception("could not right click element")
+        return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def dbclick(self, _elm):
-        self.pa.doubleClick(_elm)
+    def dbclick(self, _elm, _tooltip="Double Click", _tries=3, _delay=1, _exit=False):
+        def func_(self):
+            elm = _elm
+            elm = self.promise_element(_elm)
+            if(elm):
+                self.pa.doubleClick(elm)
+                return True
+            else:
+                raise Exception("could not double click element")
+        return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def mdclick(self, _elm):
-        self.pa.middleClick(_elm)
+    def mdclick(self, _elm, _tooltip="Middle Click", _tries=3, _delay=1, _exit=False):
+        def func_(self):
+            elm = _elm
+            elm = self.promise_element(_elm)
+            if(elm):
+                self.pa.middleClick(elm)
+                return True
+            else:
+                raise Exception("could not middle click element")
+        return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def input_into(self, _str):
-        self.pa.write(_str)
+    def get_func_name(self, _level=1):
+        #level is the scope level of function to get the name of
+        #_level 0 will return name of this function
+        #_level 1 (default) will return name of function that called this function
+        #etc
+        import inspect
+        return str(inspect.stack()[_level][3])
 
+    def input_into(self, _str, _elm=None, _tooltip="Input Text into Element", _tries=3, _delay=1, _exit=False):
+        #inputs text into whatever element is active on screen.
+        #if an element is passed, it clicks it before passing the text
+        def func_(self):
+            if(_elm is not None):
+                clicked = self.click(_elm, _tooltip=_tooltip)
+                if(clicked):
+                    self.pa.write(_str)
+            return True
+        self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
+    
     def keyboard_press(self, _key):
         self.pa.press(_key)
 
@@ -120,8 +206,16 @@ class Emploid:
     def alert(self, _str):
         return self.pa.alert(_str)
         
-    def moveto(self, _elm):
-        self.pa.moveTo(_elm, duration = 0.1)
+    def moveto(self, _elm, _tooltip="Move Mouse to Element", _tries=3, _delay=1, _exit=False):
+        def func_(self):
+            elm = _elm
+            elm = self.promise_element(_elm)
+            if(elm):
+                self.pa.moveTo(elm, duration = 0.1)
+                return True
+            else:
+                raise Exception
+        return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
     def mouse_scroll(self, _value: float, _x: float=None, _y: float=None):
         self.pa.scroll(_value, x=_x, y=_y) #positive up, negative down
@@ -165,6 +259,16 @@ class Emploid:
     def mouse_drag_to_relative(self, _xoffset, _yoffset, _seconds):
         self.pa.dragTo(_xoffset, _yoffset, duration=_seconds) 
 
+    def program_run(self, _path):
+        from pywinauto import Desktop, Application
+        prog_path = _path
+
+        program_name = prog_path.split("/")[-1]
+        program_name = program_name.split("\\")[-1]
+        
+        prog = Application().start(prog_path)
+        return prog#Application(backend='uia').connect(path=program_name, title_re='New Tab')
+    
     def chrome_run(self, _url: str="", _incognito=False, _maximized=True):
 
         if(_incognito):
@@ -222,21 +326,33 @@ class Emploid:
         return self.api.post(_url=_url, _params=_params)
     
     def clipboard_copy(self):
-
         import win32clipboard
         win32clipboard.OpenClipboard()
         data = win32clipboard.GetClipboardData()
         win32clipboard.CloseClipboard()
 
         return data
+    
+    def detect(self, _elm):
+        
+        def func_(self, _confidence=0.9):
 
-    def promise(self, _func, *_args, _tooltip="<no tooltip>", _tries=15, _delay=2, _fullerror=True, _noerror=False, _noprint=False):
+            print("locating element")
+            elm = self.locate(_elm, _confidence=_confidence)
 
+            if(elm):
+                print("detected")
+                return elm
+            else:
+                print("could not detect element")
+                return False
+        return self.promise(_func=func_, _tooltip=f"attempt to locate element...")
+
+    def promise(self, _func, *_args, _tooltip="", _tries=3, _delay=1, _fullerror=True, _noerror=False, _noprint=False, _exit=False):
 
         if(_tooltip==""):
-            _tooltip="<no tooltip>"
-
-        print(f"----------------({_tooltip})----------------")
+            _tooltip = self.get_func_name(_level=2)
+        print(f"----------------promise ({_tooltip})----------------")
 
         if(not _tries==None):
             if(_tries < 1):
@@ -245,7 +361,7 @@ class Emploid:
         state = True
         trigger = False
 
-        while ((trigger==False) and (_tries==None or _tries > 0)):
+        while ((trigger==False) and (_tries==None or _tries>0)):
 
             if(_tries is not None):
                 _tries -= 1
@@ -268,221 +384,23 @@ class Emploid:
                     if(_noerror):
                         print(_tooltip)
                     else:
-                        print(_tooltip + " failed ("+str(_tries)+f". . .) {_str}")
+                        print(_tooltip + " FAILED ("+str(_tries)+f". . .) {_str}")
 
                 sleep(_delay)
                 state = False
-        return state
-
-    def execute_steps(self, _delay=1):
-
-        for step in self.steps:
-
-            element = self.cv.imread(self.elm_path+f"/{step}")
-
-            while True:
-
-                elm_pos = self.pa.locateOnScreen(element)
-
-                if(elm_pos):
-
-                    print(f"{step} detected")
-
-                    if("DELAYY" in step):
-                        sleep(8)
-                    elif("DELAY" in step):
-                        sleep(5)
-
-                    if "DBC" in step:
-                        print("action: Double click")
-                        self.pa.doubleClick(element)
-
-                    elif "LC" in step:
-                        print("action: Left click")
-
-                        while True:
-                            try:
-                                self.lclick(element)
-                                break
-                            except:
-                                pass
-
-                    elif "RC" in step:
-                        print("action: Right click")
-                        self.rclick(element)
-
-                    elif "DRG" in step:
-                        print("action: DRAG")
-                        target = f"elements/{self.steps[self.steps.index(step)+1]}"
-                        self.pa.moveTo(x=element)
-                        self.pa.keyDown(self.pa.PRIMARY)
-                        self.drag_element = element
-                        self.pa.moveTo(x=target)
-                        self.pa.keyUp(self.pa.PRIMARY)
-                    
-                    elif "LA" in step:
-
-                        needle = element
-                        needles = list(self.pa.locateAllOnScreen(needle))
-                        self.pa.leftClick(needles[-1])
-                        
-                        # if("LC" in step):
-                        #     self.pa.leftClick(needles[-1])
-                        # if("DC" in step):
-                        #     self.pa.leftClick(needles[-1])
-                        #     self.pa.leftClick(needles[-1])
-
-                        print(needles)
-
-                    if "INPT_FIRSTNAME" in step:
-                        
-                        if(self.LANG==ARABIC):
-                            from usernames import ar_fnames as fnames
-                        if(self.LANG==ENGLISH):
-                            from usernames import en_fnames as fnames
-
-                        index = randint(0, len(fnames)-1)
-                        self.fname = fnames[index]
-
-                        print("move to element")
-                        self.pa.moveTo(elm_pos)
-                        # sleep(1)
-                        print("click element")
-                        self.pa.click()
-                        # sleep(2)
-                        self.pa.click()
-
-                        # sleep(2)
-                        # self.pa.doubleClick()
-
-                        # with(open("fname.txt", "w", encoding="utf-8") as f):
-                        #     f.write(self.fname)
-                        # sleep(1)
-                        # with(open("fname.txt", "r", encoding="utf-8") as f):
-                        #     self.fname = f.read()
-
-                        self.write(self.fname)
-                        
-
-                        # Store our string to the clipboard
-                        # pyperclip.copy(self.fname)
-                        # pyperclip.copy(self.fname)
-                        # sleep(2)
-                        # Hotkey the paste command
-                        # self.pa.hotkey("crtl", "v")
-                        # for i in self.fname:
-                        #     self.pa.keyDown(i)
-                    
-
-
-                    if "INPT_LASTNAME" in step:
-
-                        print("0")
-                        
-                        if(self.LANG==ARABIC):
-                            from usernames import ar_lnames as lnames
-                        if(self.LANG==ENGLISH):
-                            from usernames import en_lnames as lnames
-
-                        index = randint(0, len(lnames)-1)
-                        self.lname = lnames[index]
-
-                        print("move to element")
-                        self.pa.moveTo(elm_pos)
-
-                        print("click element")
-                        self.pa.click()
-                        # sleep(2)
-                        self.pa.click()
-
-
-                        # sleep(2)
-                        # self.pa.click(element)
-                        print(self.lname)
-
-                        # with(open("lname.txt", "w", encoding="utf-8") as f):
-                        #     f.write(self.lname)
-                        # sleep(1)
-                        # with(open("lname.txt", "r", encoding="utf-8") as f):
-                        #     self.lname = f.read()
-
-                        self.pa.write(self.lname)
-
-                        # pyperclip.copy(self.lname)
-                        # pyperclip.copy(self.lname)
-                        # sleep(1)
-                        # # Hotkey the paste command
-                        # self.pa.hotkey("ctrl", "v")
-                        # self.pa.doubleClick()
-                        # sleep(2)
-                        # for i in self.lname:
-                        #     self.pa.keyDown(i)
-
-                        self.fullname = self.fname + " " + self.lname
-                        
-
-                    if "INPT_EMAIL" in step:
-                        
-                        if(self.LANG==ARABIC):
-                            self.pa.keyDown('alt')
-                            self.pa.press('shift')
-                            self.pa.keyUp('ALT')
-                            
-                        self.pa.doubleClick(element)
-                        # sleep(2)
-                        for i in self.email:
-                            self.pa.keyDown(i)
-                        
-                    if "INPT_PASSWORD" in step:
-                        sleep(2)
-                        for i in self.password:
-                            self.pa.keyDown(i)
-
-                    if "INPT_CODE" in step:
-
-                        self.pa.leftClick(element)
-
-                        print("checking for new messages...")
-
-                        try:
-                            while (not len(self.mails)):
-                                self.mails = self.account.get_messages()
-                                sleep(2)
-
-                            print("mail received!")
-
-                            mail = self.mails[0]
-
-                            code = self.find_code(5, str(mail.text))
-                            
-                            print("code:", code)
-
-                            for i in code:
-                                self.pa.keyDown(i) 
-                                
-                            
-
-                        except Exception as e:
-                            print(e)
-                            pass
-
-                    if "CONFIRMED" in step:
-
-                        from api import API
-                        register = API().api_profile_register(_profile_email=self.email, _profile_password=self.password, _profile_name=self.fullname)
-                        print(register)
-                            
-                    break
-
-                else:
-                    print(f"{step} not found, waiting. . .")
-
-                
-                # sleep(_delay)
-
-
-
+        if(_exit):
+            exit()
+        else:
+            return state
     
-
-
-
+    def screen_get_size(self):
+        return self.pa.size()
+    
+    def screen_get_width(self):
+        return self.pa.size()[0]
+    
+    def screen_get_heigfht(self):
+        return self.pa.size()[1]
+        
+    def point_in_screen(self, _x, _y):
+        return self.pa.onScreen(_x, _y)
