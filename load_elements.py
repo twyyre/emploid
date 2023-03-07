@@ -85,7 +85,6 @@ element_customer_branch_one_inpt_option = emp.import_image(_dir="customer_manage
 element_customer_branch_two_inpt_option = emp.import_image(_dir="customer_management/customer_add/branch_two_inpt_option.png")
 element_customer_branch_three_inpt_option = emp.import_image(_dir="customer_management/customer_add/branch_three_inpt_option.png")
 
-
 #customer a3mal add
 element_customer_a3mal_national_id_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/national_id_inpt.png")
 element_customer_a3mal_nationality_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/nationality_inpt.png")
@@ -93,9 +92,11 @@ element_customer_a3mal_next_btn = emp.import_image(_dir="customer_management/cus
 
 element_customer_a3mal_citizen_inpt_option = emp.import_image(_dir="customer_management/customer_a3mal_add/citizen_inpt_option.png")
 element_customer_a3mal_non_citizen_inpt_option = emp.import_image(_dir="customer_management/customer_a3mal_add/non_citizen_inpt_option.png")
+element_customer_a3mal_account_number_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/account_number_inpt.png")
 
-element_customer_account_number_inpt = emp.import_image(_dir="customer_management/customer_add/account_number_inpt.png")
-element_customer_non_branch_inpt = emp.import_image(_dir="customer_management/customer_add/non_branch_inpt.png")
+element_customer_account_number_inpt = emp.import_image(_dir="customer_management/customer_add/account_number_inpt.png") #duplicate
+
+# element_customer_non_branch_inpt = emp.import_image(_dir="customer_management/customer_add/non_branch_inpt.png")
 
 element_customer_error_account_number_is_not_valid = emp.import_image(_dir="customer_management/customer_add/errors/accountNumberIsNotValid.png")
 
@@ -124,3 +125,60 @@ element_customer_a3mal_license_date_entry_inpt = emp.import_image(_dir="customer
 element_customer_a3mal_license_date_entry_btn = emp.import_image(_dir="customer_management/customer_a3mal_add/license_date_entry_btn.png")
 
 element_customer_a3mal_hasanan = emp.import_image(_dir="customer_management/customer_a3mal_add/hasanan.png")
+
+element_customer_a3mal_account_type_option_current = emp.import_image(_dir="customer_management/customer_a3mal_add/current_account_option.png")
+
+element_customer_a3mal_account_type_option_aggregate = emp.import_image(_dir="customer_management/customer_a3mal_add/aggregate_account_option.png")
+element_customer_a3mal_otp_sn_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/otp_sn_inpt.png")
+
+element_customer_a3mal_customer_name_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_name_inpt.png")
+element_customer_a3mal_customer_firstname_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_firstname_inpt.png")
+element_customer_a3mal_customer_middlename_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_middlename_inpt.png")
+element_customer_a3mal_customer_lastname_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_lastname_inpt.png")
+element_customer_a3mal_customer_gender_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_gender_inpt.png")
+element_customer_a3mal_customer_gender_male = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_gender_male.png")
+element_customer_a3mal_customer_gender_female = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_gender_female.png")
+element_customer_a3mal_customer_mothername_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_mothername_inpt.png")
+element_customer_a3mal_customer_birthplace_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_birthplace_inpt.png")
+element_customer_a3mal_customer_birthdate_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_birthdate_inpt.png")
+element_customer_a3mal_customer_status_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_status_inpt.png")
+element_customer_a3mal_customer_status_single = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_status_single.png")
+element_customer_a3mal_customer_status_widowed = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_status_widowed.png")
+element_customer_a3mal_customer_status_married = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_status_married.png")
+element_customer_a3mal_customer_status_divorced = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_status_divorced.png")
+element_customer_a3mal_customer_passport_number_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_passport_number_inpt.png")
+element_customer_a3mal_customer_passport_publish_location_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_publish_location_inpt.png")
+element_customer_a3mal_customer_passport_publish_date_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_publish_date_inpt.png")
+element_customer_a3mal_customer_passport_expiration_date_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_expiration_date_inpt.png")
+element_customer_a3mal_customer_familyhead_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_familyhead_inpt.png")
+element_customer_a3mal_customer_familyhead_yes_option = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_familyhead_yes_option.png")
+element_customer_a3mal_customer_familyhead_no_option = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_familyhead_no_option.png")
+element_customer_a3mal_customer_passport_id_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_passport_id_inpt.png")
+element_customer_a3mal_customer_family_members_number_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_family_members_number.png")
+element_customer_a3mal_customer_email_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_email_inpt.png")
+element_customer_a3mal_customer_city_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_city_inpt.png")
+element_customer_a3mal_customer_area_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_area_inpt.png")
+element_customer_a3mal_customer_mobile_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_mobile_inpt.png")
+element_customer_a3mal_customer_mobile_confirm_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_mobile_confirm_inpt.png")
+element_customer_a3mal_customer_add_btn = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_add_btn.png")
+element_customer_a3mal_customer_contract_number_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/contract_number_inpt.png")
+element_customer_a3mal_customer_contract_number_confirm_inpt = emp.import_image(_dir="customer_management/customer_a3mal_add/contract_number_confirm_inpt.png")
+element_customer_a3mal_customer_next_btn_3 = emp.import_image(_dir="customer_management/customer_a3mal_add/next_btn_3.png")
+element_customer_a3mal_customer_confirm_btn_3 = emp.import_image(_dir="customer_management/customer_a3mal_add/confirm_btn_3.png")
+element_customer_a3mal_customer_add_btn_2 = emp.import_image(_dir="customer_management/customer_a3mal_add/customer_add_btn_2.png")
+element_customer_a3mal_customer_add_success = emp.import_image(_dir="customer_management/customer_a3mal_add/success.png")
+element_customer_a3mal_customer_ok_btn = emp.import_image(_dir="customer_management/customer_a3mal_add/ok.png")
+
+#customer manage data
+element_customer_manage_data_branch_inpt = emp.import_image(_dir="customer_management/customer_data_management/customer_manage_data/branch_inpt.png")
+element_customer_manage_data_account_number_inpt = emp.import_image(_dir="customer_management/customer_data_management/customer_manage_data/account_number_inpt.png")
+element_customer_manage_data_search_btn = emp.import_image(_dir="customer_management/customer_data_management/customer_manage_data/search_btn.png")
+
+#errors
+element_error_noDataToShow = emp.import_image(_dir="error/noDataToShow.png")
+element_error_nationalIdAlreadyUsed = emp.import_image(_dir="error/nationalIdAlreadyUsed.png")
+element_error_customerAlreadyExists = emp.import_image(_dir="error/customerAlreadyExists.png")
+element_error_otpNotAvailable = emp.import_image(_dir="error/otpNotAvailable.png")
+
+
+

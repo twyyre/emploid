@@ -9,11 +9,18 @@ emp.set_delay(0.2)
 show = emp.show
 show("started")
 
+from modules.taskman.taskman import Taskman
+taskman = Taskman()
+beholder = taskman.start_task("record.py")
+
 #
 def func_(emp):
-    emp.chrome_run(_url="http://10.10.20.44:4455/", _maximized=False)
-emp.promise(_func=func_, _tooltip="open chrome window")
+    chrome = emp.chrome_run(_url="http://10.10.20.44:4455/", _maximized=False)
+    sleep(1)
+    chrome.kill()
+    exit()
 
+emp.promise(_func=func_, _tooltip="open chrome window")
 #
 from actions.action_login import action_login
 action_login(emp, _username="shewa", _password="11111111")
@@ -34,5 +41,7 @@ action_add_user(
 from actions.action_logout import action_logout
 action_logout(emp)
 
+sleep(2)
+beholder.kill()
 show("FINISHED")
 exit()

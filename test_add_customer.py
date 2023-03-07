@@ -16,33 +16,13 @@ emp.promise(_func=func_, _tooltip="open chrome window")
 
 sleep(2)
 
-#
-try:
-    import action_login
-    pass
-except Exception as e:
-    print("login action failed")
-    print(e)
-    input()
-    exit()
+from actions.action_login import action_login
+from actions.action_add_customer import action_add_customer
+from actions.action_logout import action_logout
 
-#
-try:
-    import action_add_customer
-except Exception as e:
-    print("add user action failed")
-    print(e)
-    input()
-    exit()
-
-#
-try:
-    import action_logout
-except Exception as e:
-    print("add user action failed")
-    print(e)
-    input()
-    exit()
+action_login(emp, _username="shewa", _password="11111111")
+action_add_customer(emp, _account_number="1191111111")
+action_logout(emp)
 
 show("FINISHED")
 exit()

@@ -18,7 +18,7 @@ sleep(2)
 
 #
 try:
-    import action_login
+    import actions.action_login
     pass
 except Exception as e:
     print("login action failed")
@@ -28,7 +28,7 @@ except Exception as e:
 
 #
 try:
-    import action_manage_a3mal_customer
+    import actions.action_manage_a3mal_customer
 except Exception as e:
     print("add user action failed")
     print(e)
@@ -37,7 +37,7 @@ except Exception as e:
 
 #
 try:
-    import action_logout
+    import actions.action_logout
 except Exception as e:
     print("add user action failed")
     print(e)

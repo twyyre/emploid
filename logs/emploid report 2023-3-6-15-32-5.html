@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <title>Scribe</title>
 <head>
@@ -39,8 +39,8 @@
 
         <h2 class="title">Scribe</h2>
 
-        <h3 class="centered">test: 2023-2-13-3-18</h3>
-        <h4 class="centered">testcase: login</h4>
+        <h3 class="centered"> 2023-3-6-15-32-5</h3>
+        <h4 class="centered">report</h4>
 
         <div class="list container">
 
@@ -55,29 +55,11 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <th scope="row">1</th>
-                        <td>open chrome browser</td>
-                        <td>completed</td>
-                        <td class="alert-success">completed</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">2</th>
-                        <td>load test page</td>
-                        <td>completed</td>
-                        <td class="alert-danger">failed</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td>locate logo</td>
-                        <td>completed</td>
-                        <td class="alert-danger">failed</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td>input user password</td>
-                        <td>completed</td>
-                        <td class="alert-danger">failed</td>
-                    </tr>
+    <th scope="row">{{row_number}}</th>
+    <td>{{action_name}}</td>
+    <td>{{expected_result}}</td>
+    <td class="{{result_state}}">{{actual_result}}</td>
+</tr>
                 </tbody>
             </table>
 

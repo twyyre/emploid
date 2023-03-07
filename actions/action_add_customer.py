@@ -30,26 +30,16 @@ def action_add_customer(emp, _account_number):
             elm = emp.locate(element_customer_branch_two_inpt_option)
             if(elm):
                 emp.click(elm)
-                
+            else: 
+                raise Exception
         else:
             raise Exception
-    emp.promise(_func=func_, _tooltip="click on branch input")
+    emp.promise(_func=func_, _tooltip="click on branch input", _tries=5, _delay=2)
 
-    def func_(emp):
-        elm = emp.locate(element_customer_account_number_inpt)
-        emp.click(elm)
-        emp.input_into(account_number)
+    emp.input_into("5555555555555", element_customer_account_number_inpt, "click on account number input")
 
-    emp.promise(_func=func_, _tooltip="click on account number input")
-
-    def func_(emp):
-        elm = emp.locate(element_customer_next_btn)
-        if(elm):
-            emp.click(elm)
-        else:
-            raise Exception
-    emp.promise(_func=func_, _tooltip="click next")
-
+    emp.click(element_customer_next_btn, "click next")
+    
     def func_(emp):
         elm = emp.locate(element_customer_error_account_number_is_not_valid)
         if(elm):
@@ -59,7 +49,6 @@ def action_add_customer(emp, _account_number):
             print("successful")
     emp.promise(_func=func_, _tooltip="click next")
 
-    exit()
 
 
 

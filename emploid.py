@@ -8,13 +8,13 @@ class Emploid:
         import numpy as np
         import cv2 as cv
         from api import API
-        from modules.emp_scribe import Scribe
+        from modules.scribe.scribe import Scribe
 
         self.pa = pa
         self.cv = cv
         self.np = np
         self.api = API
-        self.scribe = Scribe
+        self.scribe = Scribe()
 
         self.steps = []
         self.internal_path = "elements/"
@@ -22,12 +22,12 @@ class Emploid:
         # self.average_scroll_distance = 50
         self.keys = self.pa.KEYBOARD_KEYS
 
-    def show(self, *_args):
+    def show(self, *_args) -> None:
         for arg in _args:
             print("----", arg)
         print("\n------------------------")
 
-    def get_steps(self):
+    def get_steps(self) -> list[str]:
         self.steps = listdir(self.internal_path)
 
         # for dir in self.steps:
@@ -36,7 +36,7 @@ class Emploid:
 
         print(f"got ({len(self.steps)}) steps")
         
-    def image_compare(self, _img1, _img2):
+    def image_compare(self, _img1, _img2) -> float:
 
         # load the input images
         img1 = _img1
@@ -93,12 +93,18 @@ class Emploid:
                     print("could not detect element")
                     return False
             return self.promise(_func=func_, _tooltip=f"promising element...")
-
-    def press(self):
-        'left' 'middle' 'right'
-        self.pa.click()
         
-    def click(self, _elm, _tooltip="Click", _tries=3, _delay=1, _exit=False):
+    def keyboard_paste(self, _str) -> None:
+        import pyperclip
+        pyperclip.copy(_str)
+        self.keyboard_hotkey("ctrl", "v")
+
+    def press(self, _btn: int =0) -> None:
+        btns = ['left', 'right', 'middle' ]
+        btn = btns[_btn]
+        self.pa.click(btn)
+        
+    def click(self, _elm, _tooltip="Click", _tries=3, _delay=1, _exit=False) -> bool:
         def func_(self):
             elm = _elm
             elm = self.promise_element(_elm)
@@ -109,7 +115,7 @@ class Emploid:
                 raise Exception("could not click element")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def lclick(self, _elm, _tooltip="Left Click", _tries=3, _delay=1, _exit=False):
+    def lclick(self, _elm, _tooltip="Left Click", _tries=3, _delay=1, _exit=False)  -> bool:
         def func_(self):
             elm = _elm
             elm = self.promise_element(_elm)
@@ -120,7 +126,7 @@ class Emploid:
                 raise Exception("could not left click element")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def rclick(self, _elm, _tooltip="Right Click", _tries=3, _delay=1, _exit=False):
+    def rclick(self, _elm, _tooltip="Right Click", _tries=3, _delay=1, _exit=False) -> bool:
         def func_(self):
             elm = _elm
             elm = self.promise_element(_elm)
@@ -131,7 +137,7 @@ class Emploid:
                 raise Exception("could not right click element")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def dbclick(self, _elm, _tooltip="Double Click", _tries=3, _delay=1, _exit=False):
+    def dbclick(self, _elm, _tooltip="Double Click", _tries=3, _delay=1, _exit=False) -> bool:
         def func_(self):
             elm = _elm
             elm = self.promise_element(_elm)
@@ -142,7 +148,7 @@ class Emploid:
                 raise Exception("could not double click element")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def mdclick(self, _elm, _tooltip="Middle Click", _tries=3, _delay=1, _exit=False):
+    def mdclick(self, _elm, _tooltip="Middle Click", _tries=3, _delay=1, _exit=False) -> bool:
         def func_(self):
             elm = _elm
             elm = self.promise_element(_elm)
@@ -153,7 +159,7 @@ class Emploid:
                 raise Exception("could not middle click element")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def get_func_name(self, _level=1):
+    def get_func_name(self, _level=1) -> str:
         #level is the scope level of function to get the name of
         #_level 0 will return name of this function
         #_level 1 (default) will return name of function that called this function
@@ -161,7 +167,7 @@ class Emploid:
         import inspect
         return str(inspect.stack()[_level][3])
 
-    def input_into(self, _str, _elm=None, _tooltip="Input Text into Element", _tries=3, _delay=1, _exit=False):
+    def input_into(self, _str, _elm=None, _tooltip="Input Text into Element", _tries=3, _delay=1, _exit=False) -> bool:
         #inputs text into whatever element is active on screen.
         #if an element is passed, it clicks it before passing the text
         def func_(self):
@@ -172,16 +178,16 @@ class Emploid:
             return True
         self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
     
-    def keyboard_press(self, _key):
+    def keyboard_press(self, _key) -> None:
         self.pa.press(_key)
 
-    def keyboard_hold(self, _key):
+    def keyboard_hold(self, _key) -> None:
         self.pa.keyDown(_key)
 
-    def keyboard_release(self, _key):
+    def keyboard_release(self, _key) -> None:
         self.pa.keyUp(_key)
     
-    def keyboard_hotkey(self, *_keys):
+    def keyboard_hotkey(self, *_keys) -> None:
         self.pa.hotkey(*_keys) 
 
     def locate(self, _elm, _confidence=0.9, _grayscale=True):
@@ -193,7 +199,7 @@ class Emploid:
     def locate_all(self, _elm, _confidence=0.9, _grayscale=True):
         return list(self.pa.locateAllOnScreen(_elm, confidence=_confidence, grayscale=_grayscale))
 
-    def prompt(self, _str):
+    def prompt(self, _str) -> None:
         return self.pa.prompt(_str)
 
     def confirm(self, _str):
@@ -206,7 +212,7 @@ class Emploid:
     def alert(self, _str):
         return self.pa.alert(_str)
         
-    def moveto(self, _elm, _tooltip="Move Mouse to Element", _tries=3, _delay=1, _exit=False):
+    def moveto(self, _elm, _tooltip="Move Mouse to Element", _tries=3, _delay=1, _exit=False) -> bool:
         def func_(self):
             elm = _elm
             elm = self.promise_element(_elm)
@@ -217,14 +223,14 @@ class Emploid:
                 raise Exception
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def mouse_scroll(self, _value: float, _x: float=None, _y: float=None):
+    def mouse_scroll(self, _value: float, _x: float=None, _y: float=None) -> None:
         self.pa.scroll(_value, x=_x, y=_y) #positive up, negative down
 
-    def mouse_scroll_up(self, _value: float=250, _x: float=None, _y: float=None):
+    def mouse_scroll_up(self, _value: float=250, _x: float=None, _y: float=None) -> None:
         value = abs(_value)
         self.mouse_scroll(value, _x, _y)
 
-    def mouse_scroll_down(self, _value: float=-250, _x: float=None, _y: float=None):
+    def mouse_scroll_down(self, _value: float=-250, _x: float=None, _y: float=None) -> None:
         value = -abs(_value)
         self.mouse_scroll(value, _x, _y)
 
@@ -241,46 +247,41 @@ class Emploid:
     def get_mouse_pos(self):
         return self.pa.position()
 
-    def set_delay(self, _value: float):
+    def set_delay(self, _value: float) -> None:
         self.pa.PAUSE = _value
 
-    def set_failsafe(self, _value: bool):
+    def set_failsafe(self, _value: bool) -> None:
         self.pa.FAILSAFE = _value
 
-    def mouse_move_relative(self, _xoffset=0, _yoffset=0, _seconds=0):
+    def mouse_move_relative(self, _xoffset=0, _yoffset=0, _seconds=0) -> None:
         self.pa.moveRel(_xoffset, _yoffset, duration=_seconds)
 
-    def mouse_move(self, _x, _y, _seconds):
+    def mouse_move(self, _x, _y, _seconds=0) -> None:
         self.pa.moveTo(_x, _y, duration=_seconds)
 
-    def mouse_drag_to(self, _x, _y, _seconds):
+    def mouse_drag_to(self, _x, _y, _seconds) -> None:
         self.pa.dragTo(_x, _y, duration=_seconds)  # drag mouse to XY
 
-    def mouse_drag_to_relative(self, _xoffset, _yoffset, _seconds):
+    def mouse_drag_to_relative(self, _xoffset, _yoffset, _seconds) -> None:
         self.pa.dragTo(_xoffset, _yoffset, duration=_seconds) 
 
     def program_run(self, _path):
         from pywinauto import Desktop, Application
         prog_path = _path
-
         program_name = prog_path.split("/")[-1]
         program_name = program_name.split("\\")[-1]
-        
         prog = Application().start(prog_path)
         return prog#Application(backend='uia').connect(path=program_name, title_re='New Tab')
     
-    def chrome_run(self, _url: str="", _incognito=False, _maximized=True):
-
+    def chrome_run(self, _url: str="", _incognito=False, _maximized=True) -> None:
         if(_incognito):
             _incognito = "-incognito"
         else:
             _incognito = ""
-
         if(_maximized):
             _maximized = "--start-maximized"
         else:
             _maximized = ""
-
         from pywinauto import Desktop, Application
         chrome_dir = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
         page_url = _url
@@ -299,22 +300,19 @@ class Emploid:
             except:
                 pass
 
-    def email_listen(self, _email):
+    def email_listen(self, _email) -> str:
         try:
             mails = []
-
             while (not len(mails)): #this needs modification
                 mails = _email.get_messages()
                 sleep(2)
-
             mail = mails[0]
-            code = self.find_code(5, str(mail.text))
-            
+            return self.find_code(5, str(mail.text))
         except Exception as e:
             print(e)
             pass
 
-    def email_find_code(self, n, s):
+    def email_find_code(self, n, s) -> str:
         import re
         result = re.search('\d{%s}'%n, s)
         return result.group(0) if result else result
@@ -330,16 +328,12 @@ class Emploid:
         win32clipboard.OpenClipboard()
         data = win32clipboard.GetClipboardData()
         win32clipboard.CloseClipboard()
-
         return data
     
     def detect(self, _elm):
-        
         def func_(self, _confidence=0.9):
-
             print("locating element")
-            elm = self.locate(_elm, _confidence=_confidence)
-
+            elm = self.promise_element(_elm)
             if(elm):
                 print("detected")
                 return elm
@@ -349,43 +343,33 @@ class Emploid:
         return self.promise(_func=func_, _tooltip=f"attempt to locate element...")
 
     def promise(self, _func, *_args, _tooltip="", _tries=3, _delay=1, _fullerror=True, _noerror=False, _noprint=False, _exit=False):
-
         if(_tooltip==""):
             _tooltip = self.get_func_name(_level=2)
         print(f"----------------promise ({_tooltip})----------------")
-
         if(not _tries==None):
             if(_tries < 1):
                 _tries = None
-
         state = True
         trigger = False
-
         while ((trigger==False) and (_tries==None or _tries>0)):
-
             if(_tries is not None):
                 _tries -= 1
-
             try:
                 result = _func(self, *_args)
                 trigger = True
                 state = True
                 return result
-
             except Exception as e:
-
                 if(_fullerror):
                     _str = "\nwith Exception:\n" + str(e)
                     pass
                 else:
                     _str = ""
-
                 if(not _noprint):
                     if(_noerror):
                         print(_tooltip)
                     else:
                         print(_tooltip + " FAILED ("+str(_tries)+f". . .) {_str}")
-
                 sleep(_delay)
                 state = False
         if(_exit):
