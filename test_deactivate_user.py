@@ -24,7 +24,7 @@ from actions.action_logout import action_logout
 action_login(emp, _username="shewa", _password="11111111")
 action_search_user(emp, _username="ayoub")
 action_deactivate(emp)
-action_logout(emp)
+# action_logout(emp)
 
 show("FINISHED")
 exit()

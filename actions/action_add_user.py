@@ -28,6 +28,10 @@ def action_add_user(emp, _name, _username, _email, _mobile, _password, _type):
     emp.promise(_func=func_)
     emp.click(element_user_add, "click user add btn")
     emp.click(user_type, "choose user type")
+    if(_type==0):
+        emp.click(element_user_edit_branch_inpt, "click on branch input")
+        emp.click(element_user_add_branch_option_one, "choose branch option")
+        emp.click(element_user_edit_permission_ok_btn, "click ok")
     emp.click(element_user_add_name_input, "click username input")
     name = pyperclip.copy(name)
     emp.keyboard_hotkey("ctrl", "v")
@@ -36,7 +40,16 @@ def action_add_user(emp, _name, _username, _email, _mobile, _password, _type):
     emp.mouse_scroll_down() #so that the rest of the input fields are visible
     emp.input_into(mobile, element_user_add_mobile_input, "input user mobile")
     emp.input_into(password, element_user_add_password_input, "input user password")
+    if(_type==0):
+        emp.mouse_scroll_down() 
     emp.input_into(confirm_password, element_user_add_password_confirm_input, "confirm user password")
+    if(_type==0):
+        emp.click(element_user_edit_permission_inpt, "click on permission input")
+        emp.click(element_user_edit_permission_1_insertAfrad, "assign permission element_user_edit_permission_1_insertAfrad")
+        emp.click(element_user_edit_permission_2_insertA3mal, "assign permission element_user_edit_permission_2_insertA3mal")
+        emp.click(element_user_edit_permission_3_activateBankAfrad, "assign permission element_user_edit_permission_3_activateBankAfrad")
+        emp.click(element_user_edit_permission_4_activateBankA3mal, "assign permission element_user_edit_permission_4_activateBankA3mal")
+        emp.click(element_user_edit_permission_ok_btn, "click ok")
     emp.mouse_scroll_down() #so that the submit button is visible
     emp.click(element_user_add_add, "click submit btn")
     def func_(emp):

@@ -73,25 +73,24 @@ def action_add_a3mal_customer(emp,
     contract_number = _contract_number
     contract_number_confirm = _contract_number_confirm
 
-    err_nationalIdAlreadyUsed = None
-    err_customerAlreadyExists = None
-    err_otpNotAvailable = None
+    emp.err_nationalIdAlreadyUsed = None
+    emp.err_customerAlreadyExists = None
+    emp.err_otpNotAvailable = None
     
-
     def func_(emp):
         btn_list = emp.locate_all(element_dashboard_btns)
         emp.click(btn_list[1]) #customer management
-    emp.promise(_func=func_, _tooltip="click on user management button 1")
+    emp.promise(_func=func_, _tooltip="click on customer management button 1")
 
     def func_(emp):
         btn_list = emp.locate_all(element_dashboard_btns)
         emp.click(btn_list[2]) #customer management
-    emp.promise(_func=func_, _tooltip="click on user management button 2")
+    emp.promise(_func=func_, _tooltip="click on customer management button 2")
 
     def func_(emp):
         btn_list = emp.locate_all(element_dashboard_btns)
         emp.click(btn_list[0]) #customer management
-    emp.promise(_func=func_, _tooltip="click on user management button 3")
+    emp.promise(_func=func_, _tooltip="click on customer management button 3")
     
     def func_(emp):
         elm = emp.locate(element_customer_a3mal_nationality_inpt)
@@ -119,246 +118,248 @@ def action_add_a3mal_customer(emp,
         detected = emp.locate(element_error_nationalIdAlreadyUsed)
         if(detected):
             print("nationaIdAlreadyUsed")
-            global err_nationalIdAlreadyUsed
-            err_nationalIdAlreadyUsed = True
+            emp.err_nationalIdAlreadyUsed
+            emp.err_nationalIdAlreadyUsed = True
+
         else:
             raise Exception
     emp.promise(_func=func_, _tooltip="check for nationalIdAlreadyUsed", _tries=3, _delay=1)
     
-    if(err_nationalIdAlreadyUsed):
-        exit()
-    # emp.input_into(company_name, element_customer_a3mal_company_name_inpt, "click company name input")
-    emp.dbclick(element_customer_a3mal_company_name_inpt, "click company name input")
-    
-    pyperclip.copy(company_name)
-    emp.keyboard_hotkey("ctrl", "v")
+    if(not emp.err_nationalIdAlreadyUsed):
+        # emp.input_into(company_name, element_customer_a3mal_company_name_inpt, "click company name input")
+        emp.dbclick(element_customer_a3mal_company_name_inpt, "click company name input")
         
-    emp.input_into(commerical_record, element_customer_a3mal_commercial_record_inpt, "click commerical record")
+        pyperclip.copy(company_name)
+        emp.keyboard_hotkey("ctrl", "v")
+            
+        emp.input_into(commerical_record, element_customer_a3mal_commercial_record_inpt, "click commerical record")
 
-    emp.input_into(license_number, element_customer_a3mal_license_number_inpt, "click license number")
+        emp.input_into(license_number, element_customer_a3mal_license_number_inpt, "click license number")
         
-    emp.click(element_customer_a3mal_license_date_inpt, "click license date")
-    
-    emp.click(element_customer_a3mal_license_date_entry_btn)
+        emp.click(element_customer_a3mal_license_date_inpt, "click license date")
+        
+        emp.click(element_customer_a3mal_license_date_entry_btn)
+                
+        emp.click(element_customer_a3mal_license_date_entry_inpt, "click on manual entry btn")
+
+        emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
+        emp.keyboard_press("backspace")
+
+        for char in license_date:
+            emp.input_into(char)
+        
+        emp.click(element_customer_a3mal_hasanan)
+        
+        emp.click(element_customer_a3mal_account_type_inpt)
+        emp.click(acc_type)
+        
+        emp.click(element_customer_a3mal_branch_inpt, "click branch inpt")
+        emp.click(branch, "click branch option")
+
+        emp.input_into(branch_id, element_customer_a3mal_branch_id_inpt, "click branch id input")
+
+        emp.click(element_customer_a3mal_account_desc_inpt, "click account description input")
+        
+        pyperclip.copy(account_desc)
+        emp.keyboard_hotkey("ctrl", "v")
+        
+        emp.input_into(account_number, element_customer_a3mal_account_number_inpt, "input account number")
+
+        sleep(0.4)
+
+        def func_(emp):
+            detected = emp.locate(element_error_customerAlreadyExists)
+            if(detected):
+                print("emp.err_customerAlreadyExists")
+                emp.err_customerAlreadyExists
+                emp.err_customerAlreadyExists = True
+            else:
+                raise Exception
+        emp.promise(_func=func_, _tooltip="check for emp.err_customerAlreadyExists", _tries=3, _delay=1)
+        
+        if(not emp.err_customerAlreadyExists):
+            sleep(1)
+
+            emp.mouse_scroll_down() #so that the add button is visible
+
+            emp.click(element_customer_a3mal_add_btn, "click add btn")
             
-    emp.click(element_customer_a3mal_license_date_entry_inpt, "click on manual entry btn")
+            emp.click(element_customer_a3mal_next_btn2, "click next btn")
 
-    emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
-    emp.keyboard_press("backspace")
+            emp.mouse_scroll_up() 
 
-    for char in license_date:
-        emp.input_into(char)
-    
-    emp.click(element_customer_a3mal_hasanan)
-      
-    emp.click(element_customer_a3mal_account_type_inpt)
-    emp.click(acc_type)
-    
-    emp.click(element_customer_a3mal_branch_inpt, "click branch inpt")
-    emp.click(branch, "click branch option")
+            emp.input_into(otp_sn, element_customer_a3mal_otp_sn_inpt, "input sequence number")
 
-    emp.input_into(branch_id, element_customer_a3mal_branch_id_inpt, "click branch id input")
+            sleep(0.4)
 
-    emp.click(element_customer_a3mal_account_desc_inpt, "click account description input")
-    
-    pyperclip.copy(account_desc)
-    emp.keyboard_hotkey("ctrl", "v")
-    
-    emp.input_into(account_number, element_customer_a3mal_account_number_inpt, "input account number")
+            emp.click(element_customer_a3mal_add_btn, "click add btn")
 
-    sleep(0.4)
+            def func_(emp):
+                detected = emp.locate(element_error_otpNotAvailable)
+                if(detected):
+                    print("emp.err_otpNotAvailable")
+                    emp.err_otpNotAvailable = True
+                else:
+                    raise Exception
+            emp.promise(_func=func_, _tooltip="check for emp.err_otpNotAvailable", _tries=3, _delay=1)
 
-    def func_(emp):
-        detected = emp.locate(element_error_customerAlreadyExists)
-        if(detected):
-            print("err_customerAlreadyExists")
-            global err_customerAlreadyExists
-            err_customerAlreadyExists = True
-            exit()
-        else:
-            raise Exception
-    emp.promise(_func=func_, _tooltip="check for err_customerAlreadyExists", _tries=3, _delay=1)
-    
-    sleep(1)
+            sleep(0.4)
 
-    emp.mouse_scroll_down() #so that the add button is visible
+            if(not emp.err_otpNotAvailable):
 
-    emp.click(element_customer_a3mal_add_btn, "click add btn")
-    
-    emp.click(element_customer_a3mal_next_btn2, "click next btn")
+                emp.click(element_customer_a3mal_next_btn2, "click next btn")
 
-    emp.mouse_scroll_up() 
+                emp.click(element_customer_a3mal_customer_name_inpt, "insert customer name") 
+                pyperclip.copy(customer_name)
+                emp.keyboard_hotkey("ctrl", "v")
+                emp.input_into(firstname, element_customer_a3mal_customer_firstname_inpt, "insert customer firstname") 
+                emp.input_into(middlename, element_customer_a3mal_customer_middlename_inpt, "insert customer middlename") 
+                emp.input_into(lastname, element_customer_a3mal_customer_lastname_inpt, "insert customer lastname") 
+                emp.click(element_customer_a3mal_customer_gender_inpt, "click gender input") 
+                types = [element_customer_a3mal_customer_gender_male, element_customer_a3mal_customer_gender_female]
+                gender_type = types[_gender_type]
+                emp.click(gender_type, "choose gender type") 
+                emp.click(element_customer_a3mal_customer_mothername_inpt, "click mother name inpt")
+                pyperclip.copy(mothername)
+                emp.keyboard_hotkey("ctrl", "v") 
+                emp.click(element_customer_a3mal_customer_birthplace_inpt, "click on birthplace input") 
+                pyperclip.copy(birthplace)
+                emp.keyboard_hotkey("ctrl", "v") 
+                #
+                emp.click(element_customer_a3mal_customer_birthdate_inpt, "click customer birthdate input") 
+                
+                emp.click(element_customer_a3mal_license_date_entry_btn, "click manual entry btn")
+                        
+                #
+                emp.click(element_customer_a3mal_license_date_entry_inpt, "click on manual entry btn")
+                emp.click(element_customer_a3mal_license_date_entry_btn)
+                        
+                emp.click(element_customer_a3mal_license_date_entry_inpt, "click on manual entry btn")
 
-    emp.input_into(otp_sn, element_customer_a3mal_otp_sn_inpt, "input sequence number")
+                emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
+                emp.keyboard_press("backspace")
 
-    sleep(0.4)
+                for char in license_date:
+                    emp.input_into(char)
+                
+                emp.click(element_customer_a3mal_hasanan)
 
-    emp.click(element_customer_a3mal_add_btn, "click add btn")
+                emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
+                emp.keyboard_press("backspace")
 
-    def func_(emp):
-        detected = emp.locate(element_error_otpNotAvailable)
-        if(detected):
-            print("err_otpNotAvailable")
-            global err_otpNotAvailable
-            err_otpNotAvailable = True
-            exit()
-        else:
-            raise Exception
-    emp.promise(_func=func_, _tooltip="check for err_otpNotAvailable", _tries=3, _delay=1)
+                for char in license_date:
+                    emp.input_into(char)
+                
+                emp.click(element_customer_a3mal_hasanan)
+                #
+                emp.click(element_customer_a3mal_customer_status_inpt) 
+                types = [element_customer_a3mal_customer_status_single, element_customer_a3mal_customer_status_married, element_customer_a3mal_customer_status_divorced, element_customer_a3mal_customer_status_widowed]
+                customer_status = types[customer_status]
+                emp.click(customer_status) 
+                emp.input_into(passport_number, element_customer_a3mal_customer_passport_number_inpt) 
+                emp.click(element_customer_a3mal_customer_passport_publish_location_inpt, "click publish location input") 
+                pyperclip.copy(publish_location)
+                emp.keyboard_hotkey("ctrl", "v") 
+                #
+                emp.click(element_customer_a3mal_customer_passport_publish_date_inpt) 
+                emp.click(element_customer_a3mal_license_date_entry_inpt, "click on manual entry btn")
 
-    sleep(0.4)
+                emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
+                emp.keyboard_press("backspace")
 
-    emp.click(element_customer_a3mal_next_btn2, "click next btn")
+                for char in license_date:
+                    emp.input_into(char)
+                
+                emp.click(element_customer_a3mal_hasanan)
 
-    emp.click(element_customer_a3mal_customer_name_inpt, "insert customer name") 
-    pyperclip.copy(customer_name)
-    emp.keyboard_hotkey("ctrl", "v")
-    emp.input_into(firstname, element_customer_a3mal_customer_firstname_inpt, "insert customer firstname") 
-    emp.input_into(middlename, element_customer_a3mal_customer_middlename_inpt, "insert customer middlename") 
-    emp.input_into(lastname, element_customer_a3mal_customer_lastname_inpt, "insert customer lastname") 
-    emp.click(element_customer_a3mal_customer_gender_inpt, "click gender input") 
-    types = [element_customer_a3mal_customer_gender_male, element_customer_a3mal_customer_gender_female]
-    gender_type = types[_gender_type]
-    emp.click(gender_type, "choose gender type") 
-    emp.click(element_customer_a3mal_customer_mothername_inpt, "click mother name inpt")
-    pyperclip.copy(mothername)
-    emp.keyboard_hotkey("ctrl", "v") 
-    emp.click(element_customer_a3mal_customer_birthplace_inpt, "click on birthplace input") 
-    pyperclip.copy(birthplace)
-    emp.keyboard_hotkey("ctrl", "v") 
-    #
-    emp.click(element_customer_a3mal_customer_birthdate_inpt, "click customer birthdate input") 
-    
-    emp.click(element_customer_a3mal_license_date_entry_btn, "click manual entry btn")
-            
-    #
-    emp.click(element_customer_a3mal_license_date_entry_inpt, "click on manual entry btn")
-    emp.click(element_customer_a3mal_license_date_entry_btn)
-            
-    emp.click(element_customer_a3mal_license_date_entry_inpt, "click on manual entry btn")
+                emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
+                emp.keyboard_press("backspace")
 
-    emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
-    emp.keyboard_press("backspace")
+                for char in license_date:
+                    emp.input_into(char)
+                
+                emp.click(element_customer_a3mal_hasanan)
+                #
+                emp.mouse_scroll_down() 
+                #
+                emp.click(element_customer_a3mal_customer_passport_expiration_date_inpt) 
+                emp.click(element_customer_a3mal_license_date_entry_inpt, "click on manual entry btn")
 
-    for char in license_date:
-        emp.input_into(char)
-    
-    emp.click(element_customer_a3mal_hasanan)
+                emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
+                emp.keyboard_press("backspace")
 
-    emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
-    emp.keyboard_press("backspace")
+                for char in license_date:
+                    emp.input_into(char)
+                
+                emp.click(element_customer_a3mal_hasanan)
 
-    for char in license_date:
-        emp.input_into(char)
-    
-    emp.click(element_customer_a3mal_hasanan)
-    #
-    emp.click(element_customer_a3mal_customer_status_inpt) 
-    types = [element_customer_a3mal_customer_status_single, element_customer_a3mal_customer_status_married, element_customer_a3mal_customer_status_divorced, element_customer_a3mal_customer_status_widowed]
-    customer_status = types[customer_status]
-    emp.click(customer_status) 
-    emp.input_into(passport_number, element_customer_a3mal_customer_passport_number_inpt) 
-    emp.click(element_customer_a3mal_customer_passport_publish_location_inpt, "click publish location input") 
-    pyperclip.copy(publish_location)
-    emp.keyboard_hotkey("ctrl", "v") 
-    #
-    emp.click(element_customer_a3mal_customer_passport_publish_date_inpt) 
-    emp.click(element_customer_a3mal_license_date_entry_inpt, "click on manual entry btn")
+                emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
+                emp.keyboard_press("backspace")
 
-    emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
-    emp.keyboard_press("backspace")
+                for char in license_date:
+                    emp.input_into(char)
+                
+                emp.click(element_customer_a3mal_hasanan)
+                emp.mouse_move_relative(_xoffset=-20, _yoffset=-20, _seconds=0)
+                #
+                emp.input_into(passport_id, element_customer_a3mal_customer_passport_id_inpt) 
+                emp.click(element_customer_a3mal_customer_familyhead_inpt) 
+                types = [element_customer_a3mal_customer_familyhead_yes_option, element_customer_a3mal_customer_familyhead_no_option]
+                familyhead_stat = types[familyhead_stat]
+                emp.click(familyhead_stat) 
 
-    for char in license_date:
-        emp.input_into(char)
-    
-    emp.click(element_customer_a3mal_hasanan)
+                emp.input_into(family_members_number, element_customer_a3mal_customer_family_members_number_inpt)
 
-    emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
-    emp.keyboard_press("backspace")
+                emp.mouse_scroll_down() 
 
-    for char in license_date:
-        emp.input_into(char)
-    
-    emp.click(element_customer_a3mal_hasanan)
-    #
-    emp.mouse_scroll_down() 
-    #
-    emp.click(element_customer_a3mal_customer_passport_expiration_date_inpt) 
-    emp.click(element_customer_a3mal_license_date_entry_inpt, "click on manual entry btn")
+                emp.click(element_customer_a3mal_next_btn)
 
-    emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
-    emp.keyboard_press("backspace")
+                emp.mouse_scroll_up() 
+                emp.mouse_scroll_up() 
 
-    for char in license_date:
-        emp.input_into(char)
-    
-    emp.click(element_customer_a3mal_hasanan)
+                emp.click(element_customer_branch_inpt)
+                emp.click(branch)
 
-    emp.keyboard_hotkey("crtl", "a") #I probably should use an alternative for keyboard hotkeys
-    emp.keyboard_press("backspace")
+                emp.input_into(email, element_customer_a3mal_customer_email_inpt)
 
-    for char in license_date:
-        emp.input_into(char)
-    
-    emp.click(element_customer_a3mal_hasanan)
-    emp.mouse_move_relative(_xoffset=-20, _yoffset=-20, _seconds=0)
-    #
-    emp.input_into(passport_id, element_customer_a3mal_customer_passport_id_inpt) 
-    emp.click(element_customer_a3mal_customer_familyhead_inpt) 
-    types = [element_customer_a3mal_customer_familyhead_yes_option, element_customer_a3mal_customer_familyhead_no_option]
-    familyhead_stat = types[familyhead_stat]
-    emp.click(familyhead_stat) 
+                emp.click(element_customer_a3mal_customer_city_inpt)
+                pyperclip.copy(city)
+                emp.keyboard_hotkey("ctrl", "v") 
 
-    emp.input_into(family_members_number, element_customer_a3mal_customer_family_members_number_inpt)
+                emp.click(element_customer_a3mal_customer_area_inpt)
+                pyperclip.copy(area)
+                emp.keyboard_hotkey("ctrl", "v") 
 
-    emp.mouse_scroll_down() 
+                emp.input_into(mobile, element_customer_a3mal_customer_mobile_inpt)
+                emp.input_into(mobile_confirm, element_customer_a3mal_customer_mobile_confirm_inpt)
+                emp.click(element_customer_a3mal_customer_add_btn)
 
-    emp.click(element_customer_a3mal_next_btn)
+                sleep(0.5)
 
-    emp.mouse_scroll_up() 
-    emp.mouse_scroll_up() 
+                emp.mouse_move(_y=0, _x=0, _seconds=0)
 
-    emp.click(element_customer_branch_inpt)
-    emp.click(branch)
+                emp.input_into(contract_number, element_customer_a3mal_customer_contract_number_inpt)
 
-    emp.input_into(email, element_customer_a3mal_customer_email_inpt)
+                emp.click(element_customer_a3mal_customer_next_btn_3)
 
-    emp.click(element_customer_a3mal_customer_city_inpt)
-    pyperclip.copy(city)
-    emp.keyboard_hotkey("ctrl", "v") 
+                sleep(0.5)
 
-    emp.click(element_customer_a3mal_customer_area_inpt)
-    pyperclip.copy(area)
-    emp.keyboard_hotkey("ctrl", "v") 
+                emp.input_into(contract_number_confirm, element_customer_a3mal_customer_contract_number_confirm_inpt)
 
-    emp.input_into(mobile, element_customer_a3mal_customer_mobile_inpt)
-    emp.input_into(mobile_confirm, element_customer_a3mal_customer_mobile_confirm_inpt)
-    emp.click(element_customer_a3mal_customer_add_btn)
+                emp.click(element_customer_a3mal_customer_confirm_btn_3)
 
-    sleep(0.5)
+                emp.click(element_customer_a3mal_customer_add_btn_2)
 
-    emp.mouse_move(_y=0, _x=0, _seconds=0)
+                success = emp.detect(element_customer_a3mal_customer_add_success)
 
-    emp.input_into(contract_number, element_customer_a3mal_customer_contract_number_inpt)
+                sleep(0.5)
 
-    emp.click(element_customer_a3mal_customer_next_btn_3)
-
-    sleep(0.5)
-
-    emp.input_into(contract_number_confirm, element_customer_a3mal_customer_contract_number_confirm_inpt)
-
-    emp.click(element_customer_a3mal_customer_confirm_btn_3)
-
-    emp.click(element_customer_a3mal_customer_add_btn_2)
-
-    success = emp.detect(element_customer_a3mal_customer_add_success)
-
-    if(success):
-        emp.click(element_customer_a3mal_customer_ok_btn)
-        print("successfully added a3mal customer")
-        exit()
-    else:
-        raise Exception("adding a3mal customer failed")
+                if(success):
+                    emp.click(element_customer_a3mal_customer_ok_btn)
+                    print("successfully added a3mal customer")
+                    exit()
+                else:
+                    raise Exception("adding a3mal customer failed")
 
 
 

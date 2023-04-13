@@ -29,15 +29,15 @@ def action_deactivate(emp, _deactivision_note="deactivate note"):
         elm = emp.locate(element_user_activision_state, _confidence=0.9)
         if(elm):
             emp.moveto(elm)
-            emp.mouse_move_relative(_xoffset=0, _yoffset=10, _seconds=0)  
-            emp.mouse_move_relative(_xoffset=-100, _yoffset=0, _seconds=0)
+            emp.mouse_move_relative(_xoffset=0, _yoffset=20, _seconds=0)  
+            emp.mouse_move_relative(_xoffset=-150, _yoffset=0, _seconds=0)
 
             global x, y, xx, yy
             x, y = emp.get_mouse_pos()
             xx = 200
             yy = 100
     emp.promise(_func=func_, _tooltip="move to activision state")
-
+    exit()
     #
     def func_(emp):
 

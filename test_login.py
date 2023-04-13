@@ -9,19 +9,22 @@ emp.set_delay(0.2)
 show = emp.show
 show("started")
 
-if(emp.screen_get_size()!=(1920, 1080)):
-    raise Exception("resolution is not supported.")
+def test_login(_username, _password):
+    from modules.taskman.taskman import Taskman
+    taskman = Taskman()
+    beholder = taskman.start_task("record.py")
 
-emp.chrome_run(_url="http://10.10.20.44:4455/")
+    emp.chrome_run(_url="http://10.10.20.44:4455/")
 
-#
-try:
-    from actions.action_login import action_login
-    action_login(emp, _username="shewa", _password="11111111")
-except Exception as e:
-    print("login action failed")
-    print(e)
-    exit()
+    try:
+        from actions.action_login import action_login
+        action_login(emp, _username=_username, _password=_password)
+    except Exception as e:
+        print("login action failed")
+        print(e)
+        exit()
 
-show("FINISHED")
-exit()
+    taskman.kill_task(beholder, _delay=2)
+    show("FINISHED")
+
+test_login(_username="shewa", _password="11111111")

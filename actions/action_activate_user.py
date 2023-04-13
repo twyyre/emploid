@@ -28,19 +28,16 @@ def action_activate(emp):
         elm = emp.locate(element_user_activision_state, _confidence=0.9)
         if(elm):
             emp.moveto(elm)
-            emp.mouse_move_relative(_xoffset=0, _yoffset=10, _seconds=0)  
-            emp.mouse_move_relative(_xoffset=-100, _yoffset=0, _seconds=0)
+            emp.mouse_move_relative(_xoffset=0, _yoffset=5, _seconds=0)  
+            emp.mouse_move_relative(_xoffset=-120, _yoffset=0, _seconds=0)
 
             global x, y, xx, yy
             x, y = emp.get_mouse_pos()
-            xx = 200
-            yy = 100
+            xx = 5000
+            yy = 5000
     emp.promise(_func=func_, _tooltip="move to activision state")
 
     def func_(emp):
-        print("------------------------checkpoint02")
-        elm = emp.locate(element_user_activate_btn)
-       
         try:
             elm = emp.locate_in_region(element_user_activate_btn, _confidence=0.9, _x=x, _y=y, _xx=xx, _yy=yy)
         except Exception as e:

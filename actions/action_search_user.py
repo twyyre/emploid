@@ -11,8 +11,10 @@ def action_search_user(emp, _username):
         btn_list = emp.locate_all(element_dashboard_btns)
         emp.click(btn_list[2]) #user management
     emp.promise(_func=func_, _tooltip="click on user management button")
+    
 
     emp.input_into(username, element_user_search_input, "click on search bar")
+    sleep(0.5)
     emp.keyboard_hotkey("enter")
 
     #

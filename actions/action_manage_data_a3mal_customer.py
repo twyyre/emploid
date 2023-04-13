@@ -4,7 +4,7 @@ from time import sleep
 from load_elements import *
 import pyperclip
 
-def action_manage_data_a3mal(emp, _nationality, _national_id, _company_name, _commerical_name, _commerical_record, _license_number, _license_date, _account_type, _branch, _branch_id, _account_desc):
+def action_manage_data_a3mal_customer(emp, _nationality, _national_id, _company_name, _commerical_name, _commerical_record, _license_number, _license_date, _account_type, _branch, _branch_id, _account_desc):
     
     nationality = _nationality#0 #citizen
     national_id = _national_id#"1190910953021"

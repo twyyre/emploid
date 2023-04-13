@@ -11,7 +11,7 @@ show("started")
 
 from modules.taskman.taskman import Taskman
 taskman = Taskman()
-task = taskman.start_task("record.py")
+beholder = taskman.start_task("record.py")
 
 def func_(emp):
     emp.chrome_run(_url="http://10.10.20.44:4455/", _maximized=False)
@@ -34,7 +34,7 @@ action_add_a3mal_customer(emp,
     _account_desc="لقد إنه حيث أن سوف لن", 
     _type=0, 
     _account_number="123558755555", 
-    _otp_sn="799788888", _gender_type=0, 
+    _otp_sn="958654352", _gender_type=0, 
     _customer_name="الصندي", 
     _firstname="ayoub", 
     _middlename="meftah", 
@@ -55,9 +55,8 @@ action_add_a3mal_customer(emp,
     _contract_number="19962023",
     _contract_number_confirm="19962023"
 )
-input()
+
 action_logout(emp)
 
-task.kill()
+taskman.kill_task(beholder, _delay=2)
 show("FINISHED")
-exit()

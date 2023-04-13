@@ -1,5 +1,6 @@
 from os import listdir
 from time import sleep
+from modules.taskman.taskman import Taskman
 
 class Emploid:
 
@@ -15,12 +16,26 @@ class Emploid:
         self.np = np
         self.api = API
         self.scribe = Scribe()
+        self.scribe.new_page("emploid report")
 
         self.steps = []
         self.internal_path = "elements/"
 
         # self.average_scroll_distance = 50
         self.keys = self.pa.KEYBOARD_KEYS
+
+        if(self.screen_get_size()!=(1920, 1080)):
+            raise Exception("resolution is not supported. Screen Resolution must be (1920x1080).")
+        
+        
+        
+        # self.taskman = Taskman()
+        # self.beholder = self.taskman.start_task("record.py")
+
+    def __del__(self):
+        # self.taskman.kill_task(self.beholder, _delay=2)
+        pass
+
 
     def show(self, *_args) -> None:
         for arg in _args:
@@ -73,19 +88,16 @@ class Emploid:
         else:
             return Exception("non-internal paths are not currently suppoorted")
         
-    def promise_element(self, _ent):
-
+    def promise_element(self, _ent, _confidence=0.9):
+        #This function needs modification, it doesn't raise an exception when the element is not found where it should. Will look into it later.
         import pyscreeze
-        a = isinstance(_ent, pyscreeze.Box)
-
-        if(a):
+        is_element = isinstance(_ent, pyscreeze.Box)
+        if(is_element):
             return _ent
         else:
             def func_(self):
-
                 print("locating element")
-                elm = self.locate(_ent)
-
+                elm = self.locate(_ent, _confidence=_confidence)
                 if(elm):
                     print("detected")
                     return elm
@@ -102,12 +114,12 @@ class Emploid:
     def press(self, _btn: int =0) -> None:
         btns = ['left', 'right', 'middle' ]
         btn = btns[_btn]
-        self.pa.click(btn)
+        self.pa.click(button=btn)
         
-    def click(self, _elm, _tooltip="Click", _tries=3, _delay=1, _exit=False) -> bool:
+    def click(self, _elm, _tooltip="Click", _tries=3, _delay=1, _confidence=0.9, _exit=False) -> bool:
         def func_(self):
             elm = _elm
-            elm = self.promise_element(_elm)
+            elm = self.promise_element(_elm, _confidence=_confidence)
             if(elm):
                 self.pa.click(elm)
                 return True
@@ -170,12 +182,14 @@ class Emploid:
     def input_into(self, _str, _elm=None, _tooltip="Input Text into Element", _tries=3, _delay=1, _exit=False) -> bool:
         #inputs text into whatever element is active on screen.
         #if an element is passed, it clicks it before passing the text
+        #THIS FUNCTION CURRENTLY WORKS WITH ELEMENTS ONLY. ELEMENTS MUST BE PASSED INTO IT.
         def func_(self):
             if(_elm is not None):
                 clicked = self.click(_elm, _tooltip=_tooltip)
                 if(clicked):
                     self.pa.write(_str)
-            return True
+                    return True
+            raise Exception("could not input into element")
         self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
     
     def keyboard_press(self, _key) -> None:
@@ -287,6 +301,7 @@ class Emploid:
         page_url = _url
         chrome = Application().start(chrome_dir + f' --force-renderer-accessibility {_incognito} {_maximized} ' + _url)
         app_new_tab = Application(backend='uia').connect(path='chrome.exe', title_re='New Tab')
+        return True
 
     def email_generate(self):
         
@@ -317,11 +332,11 @@ class Emploid:
         result = re.search('\d{%s}'%n, s)
         return result.group(0) if result else result
 
-    def send_get(self, _url, _params=None):
-        return self.api.get(_url, _params=_params)
+    def send_get(self, _url, _params=None, _json=True):
+        return self.api.get(_url, _params=_params, _json=_json)
     
-    def send_post(self, _url, _params):
-        return self.api.post(_url=_url, _params=_params)
+    def send_post(self, _url, _params, _json=True):
+        return self.api.post(_url=_url, _params=_params, _json=_json)
     
     def clipboard_copy(self):
         import win32clipboard
@@ -356,6 +371,12 @@ class Emploid:
                 _tries -= 1
             try:
                 result = _func(self, *_args)
+                if(result):
+                    col = "btn-success"
+                else:
+                    col = "btn-danger"
+                self.scribe.insert_row(0, _tooltip, "True", result, col)
+
                 trigger = True
                 state = True
                 return result
@@ -375,6 +396,7 @@ class Emploid:
         if(_exit):
             exit()
         else:
+            self.scribe.insert_row(0, _tooltip, "True", state, "btn-danger")
             return state
     
     def screen_get_size(self):
@@ -388,3 +410,16 @@ class Emploid:
         
     def point_in_screen(self, _x, _y):
         return self.pa.onScreen(_x, _y)
+    
+    def random_string(self, _length):
+        import random
+import string
+
+def generate_random_string(length):
+    from random import choice
+    """Generate a random string of the specified length"""
+    # Define the characters that can be used in the random string
+    characters = string.ascii_letters + string.digits
+    # Generate the random string
+    random_string = ''.join(choice(characters) for i in range(length))
+    return random_string
