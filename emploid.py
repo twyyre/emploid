@@ -1,34 +1,44 @@
 from os import listdir
 from time import sleep
 from modules.taskman.taskman import Taskman
+import cv2 as cv
+import numpy as np
+import random
+import string
+import pyautogui as pa
+import numpy as np
+from api import API
+from modules.scribe.scribe import Scribe
+from api import API
+import tools
+from constants import *
+import pyperclip as clip
 
 class Emploid:
 
     def __init__(self) -> None:
-        import pyautogui as pa
-        import numpy as np
-        import cv2 as cv
-        from api import API
-        from modules.scribe.scribe import Scribe
-
+        
+        self.api = API()
+        self.confidence=0.77
         self.pa = pa
         self.cv = cv
         self.np = np
         self.api = API
         self.scribe = Scribe()
         self.scribe.new_page("emploid report")
-
+        self.set_failsafe(False)
+        self.set_delay(0.2)
+        self.element_count = 0
         self.steps = []
         self.internal_path = "elements/"
 
         # self.average_scroll_distance = 50
         self.keys = self.pa.KEYBOARD_KEYS
 
-        if(self.screen_get_size()!=(1920, 1080)):
-            raise Exception("resolution is not supported. Screen Resolution must be (1920x1080).")
+        # if(self.screen_get_size()!=(1920, 1080)): #this is no longer needed because elements now can be detected regardless of resolution
+        #     raise Exception("resolution is not supported. Screen Resolution must be (1920x1080).")
         
-        
-        
+        self.load_elements()
         # self.taskman = Taskman()
         # self.beholder = self.taskman.start_task("record.py")
 
@@ -36,11 +46,35 @@ class Emploid:
         # self.taskman.kill_task(self.beholder, _delay=2)
         pass
 
-
     def show(self, *_args) -> None:
         for arg in _args:
             print("----", arg)
         print("\n------------------------")
+
+    def load_elements(self):
+        import os
+        import tools
+        directories = list(os.walk('elements'))
+
+        with(open("load_elements.py", 'w', encoding='utf-8') as f):
+            f.write("from emploid import Emploid\nimport cv2 as cv\nfrom api import API\nfrom time import sleep\nemp = Emploid()\n")
+            if(len(directories)):
+                for dir in directories:
+                    for png in dir[2]:
+                        if(png[-4:]==".png"):
+                            line = "element_"+png[:-4]+"=emp.import_image(\""+dir[0].replace("\\", "/")+"/"+png+"\", cv.IMREAD_GRAYSCALE)\n"
+                            line = line.replace("elements/", "")
+                            f.write(line)
+                else:
+                    print("failed to load [element_"+png[:-4]+"]")
+        content = tools.f_read("load_elements.py")
+
+        tools.f_write("load_elements.py", content)
+    
+    def load_identifiers(self):
+        import identifiers as id
+        for item in id:
+            print(item)
 
     def get_steps(self) -> list[str]:
         self.steps = listdir(self.internal_path)
@@ -55,7 +89,7 @@ class Emploid:
 
         # load the input images
         img1 = _img1
-        img2 = _img2
+        img2 = self.scale_to(_img2, img1)
 
         # convert the images to grayscale
         img1 = self.cv.cvtColor(img1, self.cv.COLOR_BGR2GRAY)
@@ -70,15 +104,66 @@ class Emploid:
 
     def convert_to_grayscale(self, _img):
         return self.cv.cvtColor(_img, self.cv.COLOR_BGR2GRAY)
+    
+    def detect_template(self, _needle: cv.Mat, _haystack: cv.Mat, _method=cv.TM_CCOEFF_NORMED, _threshold = 0.5):
+        template = _needle
+        haystack = _haystack
+        method= _method
+        threshold = _threshold
+        # Convert main image to grayscale if it's in color
+        # if len(main_image.shape) > 2:
+        #     main_image_gray = cv.cvtColor(main_image, cv.COLOR_BGR2GRAY)
+        # else:
+        #     main_image_gray = main_image
 
-    def import_image(self, _dir, _internal=True, _report=True):
+        # Perform template matching
+        result = cv.matchTemplate(haystack, template, method)
+
+        # Find the location of the best match
+        _, max_val, _, max_loc = cv.minMaxLoc(result)
+
+        print("accuracy:", max_val)
+
+        # Check if the match is above the threshold
+        if max_val >= threshold:
+            # return max_loc, result, template
+            return_template = True
+        else:
+            return_template = False
+
+        if(return_template):
+            template_location = max_loc
+            result = result
+            template = template
+            if template_location is not None and result is not None and template is not None:
+                print("Template found at (x, y):", template_location)
+
+                # Draw a rectangle around the detected template
+                h, w = template.shape[:2]
+                top_left = template_location
+                bottom_right = (top_left[0] + w, top_left[1] + h)
+                return result
+            else:
+                raise Exception("Template not found or below accuracy threshold.")
+    
+    def scale_to(self, _img1, _img2):
+        #scales image 1 to image 2 size
+        
+        image3 = cv.resize(_img1, (_img2.shape[1], _img2.shape[0]), cv.INTER_LINEAR_EXACT)
+        
+        if(image3.shape == _img2.shape):
+            return image3
+        else:
+            return False
+
+    def import_image(self, _dir, _method=cv.IMREAD_GRAYSCALE, _internal=True, _report=True):
         if(_internal):
             path = self.internal_path+_dir
-            import numpy as np
-            elm = self.cv.imread(path)
+            elm = self.cv.imread(path, _method)
             if(elm is not None):
                 if(_report):
                     # print(f"element ({_dir}) IMPROTED successfully")
+                    self.element_count += 1
                     pass
                 return elm
             else:
@@ -88,6 +173,33 @@ class Emploid:
         else:
             return Exception("non-internal paths are not currently suppoorted")
         
+    def import_images(self, _dir, _internal=True):
+        from os import listdir
+        from os.path import isfile, join
+
+        elements = []
+        if(_internal):
+            _dir = self.internal_path+_dir
+        else:
+            pass
+        # print("------------directory name:", _dir)
+        for element in listdir(_dir):
+
+            # print("------------files in directory:", len(listdir(_dir)))
+            
+            element_path = join(_dir, element)
+            # print("------------element path:", element_path)
+            if isfile(element_path):
+                # print("------------element is a file:", element)
+                element = self.import_image(element_path, _internal=False)
+                # print("------------element:", element)
+                elements.append(element)
+            else:
+                # print("------------element is not a file")
+                pass
+
+        return elements
+        
     def promise_element(self, _ent, _confidence=0.9):
         #This function needs modification, it doesn't raise an exception when the element is not found where it should. Will look into it later.
         import pyscreeze
@@ -96,7 +208,7 @@ class Emploid:
             return _ent
         else:
             def func_(self):
-                print("locating element")
+                print("locating element...")
                 elm = self.locate(_ent, _confidence=_confidence)
                 if(elm):
                     print("detected")
@@ -107,8 +219,7 @@ class Emploid:
             return self.promise(_func=func_, _tooltip=f"promising element...")
         
     def keyboard_paste(self, _str) -> None:
-        import pyperclip
-        pyperclip.copy(_str)
+        clip.copy(_str)
         self.keyboard_hotkey("ctrl", "v")
 
     def press(self, _btn: int =0) -> None:
@@ -116,7 +227,7 @@ class Emploid:
         btn = btns[_btn]
         self.pa.click(button=btn)
         
-    def click(self, _elm, _tooltip="Click", _tries=3, _delay=1, _confidence=0.9, _exit=False) -> bool:
+    def click(self, _elm, _tooltip="Click", _tries=3, _delay=1, _confidence=0.8, _exit=False) -> bool:
         def func_(self):
             elm = _elm
             elm = self.promise_element(_elm, _confidence=_confidence)
@@ -179,15 +290,22 @@ class Emploid:
         import inspect
         return str(inspect.stack()[_level][3])
 
-    def input_into(self, _str, _elm=None, _tooltip="Input Text into Element", _tries=3, _delay=1, _exit=False) -> bool:
+    def input_into(self, _str, _elm=None, _tooltip="Input Text into Element", _confidence=0.77, _tries=3, _delay=1, _exit=False) -> bool:
         #inputs text into whatever element is active on screen.
         #if an element is passed, it clicks it before passing the text
         #THIS FUNCTION CURRENTLY WORKS WITH ELEMENTS ONLY. ELEMENTS MUST BE PASSED INTO IT.
         def func_(self):
             if(_elm is not None):
-                clicked = self.click(_elm, _tooltip=_tooltip)
+                clicked = self.click(_elm,  _confidence=_confidence, _tooltip=_tooltip)
                 if(clicked):
-                    self.pa.write(_str)
+                    if(self.contains_arabic_letters(_str)):
+                        print("string contains arabic letters")
+                        clip.copy(_str)
+                        clip.paste()
+                        # self.keyboard_hotkey("ctrl", "v")
+
+                    else:
+                        self.pa.write(_str)
                     return True
             raise Exception("could not input into element")
         self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
@@ -204,15 +322,61 @@ class Emploid:
     def keyboard_hotkey(self, *_keys) -> None:
         self.pa.hotkey(*_keys) 
 
-    def locate(self, _elm, _confidence=0.9, _grayscale=True):
-        return self.pa.locateOnScreen(_elm, confidence=_confidence, grayscale=_grayscale)#, region=(0,0, 300, 400))
-    
-    def locate_in_region(self, _elm, _x, _y, _xx, _yy, _confidence=0.9, _grayscale=True):
-        return self.pa.locateOnScreen(_elm, confidence=_confidence, grayscale=_grayscale, region=[_x, _y, _xx, _yy])
+    def locate(self, _elm, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True): 
+        mode = _mode
         
-    def locate_all(self, _elm, _confidence=0.9, _grayscale=True):
-        return list(self.pa.locateAllOnScreen(_elm, confidence=_confidence, grayscale=_grayscale))
+        if(mode==DETECTION_MODE_REGULAR):
+            return self.pa.locateOnScreen(_elm, confidence=_confidence, grayscale=_grayscale)#, region=(0,0, 300, 400))
+        elif(mode==DETECTION_MODE_TEMPLATE_MATCHING):
+            #currently, in order for this function to work it MUST save a copy of the screenshot to storage and then load it again. Will look into this in the future and try to find a way to load it from memory that works
+            raise Exception("not supported at the moment")
+            _screen = self.pa.screenshot().save("elements/haystack.png")
+            _screen = self.import_image("haystack.png")
+            _elm = cv.imread("needle.png", cv.IMREAD_GRAYSCALE)
+            _screen = cv.imread("haystack.png", cv.IMREAD_GRAYSCALE)
+            _elm = self.multi_scale_template_matching(_screen, _elm, _confidence=_confidence)
+            print("needle:", type(_elm))
+            print("haystack:", type(_screen))
+            tools.pause()
+            _elm = self.detect_template(self, _elm, _screen)
+            cv.imwrite("result.png", _elm)
+            _elm = cv.imread("result.png")
 
+    def locate_in_region(self, _elm, _x, _y, _xx, _yy, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True): 
+        mode = _mode
+        if(mode==DETECTION_MODE_REGULAR):
+            return self.pa.locateOnScreen(_elm, confidence=_confidence, grayscale=_grayscale, region=[_x, _y, _xx, _yy])
+        elif(mode==DETECTION_MODE_TEMPLATE_MATCHING):
+            #currently, in order for this function to work it MUST save a copy of the screenshot to storage and then load it again. Will look into this in the future and try to find a way to load it from memory that works
+            raise Exception("not supported at the moment")
+            _screen = self.pa.screenshot().save("elements/haystack.png")
+            _screen = self.import_image("haystack.png")
+            _elm = self.multi_scale_template_matching(_screen, _elm)
+            # Display the result
+            cv.imshow('Multi-Scale Template Matching Result', _screen)
+            cv.waitKey(0)
+            cv.destroyAllWindows()
+            
+    def locate_all(self, _elm, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True):
+        mode = _mode
+        if(mode==DETECTION_MODE_REGULAR):
+            return list(self.pa.locateAllOnScreen(_elm, confidence=_confidence, grayscale=_grayscale))
+        elif(mode==DETECTION_MODE_TEMPLATE_MATCHING):
+            raise Exception("not supported at the moment")
+            #currently, in order for this function to work it MUST save a copy of the screenshot to storage and then load it again. Will look into this in the future and try to find a way to load it from memory that works
+            _screen = self.pa.screenshot().save("elements/haystack.png")
+            _screen = self.import_image("haystack.png")
+            _elm = self.multi_scale_template_matching(_screen, _elm)
+
+    def contains_arabic_letters(self, input_string):
+        #written by chat-gpt
+        import re
+        # Define a regular expression pattern for Arabic letters
+        arabic_letters_pattern = re.compile(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+')
+
+        # Check if the input string contains Arabic letters
+        return bool(arabic_letters_pattern.search(input_string))
+        
     def prompt(self, _str) -> None:
         return self.pa.prompt(_str)
 
@@ -287,7 +451,7 @@ class Emploid:
         prog = Application().start(prog_path)
         return prog#Application(backend='uia').connect(path=program_name, title_re='New Tab')
     
-    def chrome_run(self, _url: str="", _incognito=False, _maximized=True) -> None:
+    def chrome_run(self, _url: str="", _incognito=False, _maximized=True, _use_selenium=False) -> None:
         if(_incognito):
             _incognito = "-incognito"
         else:
@@ -296,12 +460,28 @@ class Emploid:
             _maximized = "--start-maximized"
         else:
             _maximized = ""
-        from pywinauto import Desktop, Application
-        chrome_dir = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-        page_url = _url
-        chrome = Application().start(chrome_dir + f' --force-renderer-accessibility {_incognito} {_maximized} ' + _url)
-        app_new_tab = Application(backend='uia').connect(path='chrome.exe', title_re='New Tab')
-        return True
+        if(_use_selenium):
+            from selenium import webdriver
+            from selenium.webdriver.chrome.service import Service
+            from selenium.webdriver.chrome.options import Options as chromeOptions
+            chromeoptions = chromeOptions()
+            chromeoptions.add_argument("--start-maximized")
+            chromeoptions.add_argument("--incognito")
+            self.driver = webdriver.Chrome(options=chromeoptions, service=Service(executable_path="drivers/chromedriver.exe"))
+            # self.driver.maximize_window()
+            self.driver.get(TEST_URL)
+        else:
+            from pywinauto import Desktop, Application
+            chrome_dir = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+            page_url = _url
+            chrome = Application().start(chrome_dir + f' --force-renderer-accessibility {_incognito} {_maximized} ' + _url)
+            app_new_tab = Application(backend='uia').connect(path='chrome.exe', title_re='New Tab')
+            return True
+
+    def get_otp(self, _sn=797693694):
+        _url=f"http://10.10.20.46:9832/Pages/UpdateOtpState?Sn={_sn}&state=1&culture=ar-LY"
+        result = self.api.get(_url)
+        return result
 
     def email_generate(self):
         
@@ -357,7 +537,7 @@ class Emploid:
                 return False
         return self.promise(_func=func_, _tooltip=f"attempt to locate element...")
 
-    def promise(self, _func, *_args, _tooltip="", _tries=3, _delay=1, _fullerror=True, _noerror=False, _noprint=False, _exit=False):
+    def promise(self, _func, *_args, _tooltip="", _tries=3, _delay=1, _fullerror=True, _noerror=False, _noprint=False, _exit=False, _scribble=False):
         if(_tooltip==""):
             _tooltip = self.get_func_name(_level=2)
         print(f"----------------promise ({_tooltip})----------------")
@@ -375,7 +555,7 @@ class Emploid:
                     col = "btn-success"
                 else:
                     col = "btn-danger"
-                self.scribe.insert_row(0, _tooltip, "True", result, col)
+                self.scribe.insert_row(0, _tooltip, "True", result, col, _scribble=_scribble)
 
                 trigger = True
                 state = True
@@ -401,25 +581,94 @@ class Emploid:
     
     def screen_get_size(self):
         return self.pa.size()
-    
+
     def screen_get_width(self):
         return self.pa.size()[0]
-    
+
     def screen_get_heigfht(self):
         return self.pa.size()[1]
         
     def point_in_screen(self, _x, _y):
         return self.pa.onScreen(_x, _y)
-    
-    def random_string(self, _length):
-        import random
-import string
 
-def generate_random_string(length):
-    from random import choice
-    """Generate a random string of the specified length"""
-    # Define the characters that can be used in the random string
-    characters = string.ascii_letters + string.digits
-    # Generate the random string
-    random_string = ''.join(choice(characters) for i in range(length))
-    return random_string
+    def random_string(self, _length):
+        pass
+
+    def generate_random_string(length):
+        from random import choice
+        """Generate a random string of the specified length"""
+        # Define the characters that can be used in the random string
+        characters = string.ascii_letters + string.digits
+        # Generate the random string
+        random_string = ''.join(choice(characters) for i in range(length))
+        return random_string
+
+    def multi_scale_template_matching(self, main_image, template, _confidence=0.77): #WRITTEN BY CHAT-GPT
+
+        # Convert images to grayscale
+        main_gray = cv.cvtColor(main_image, cv.COLOR_BGR2GRAY)
+        template_gray = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
+
+        # Initialize a list to store the results at different scales
+        results = []
+
+        # Define a range of scales to consider
+        scales = np.linspace(0.2, 1.0, 10)[::-1]
+
+        for scale in scales:
+            # Resize the template
+            resized_template = cv.resize(template_gray, (0, 0), fx=scale, fy=scale)
+
+            # Use template matching
+            result = cv.matchTemplate(main_gray, resized_template, cv.TM_CCOEFF_NORMED)
+
+            # Find the location of the best match
+            _, _, _, max_loc = cv.minMaxLoc(result)
+
+            # Store the results along with the scale
+            results.append((scale, max_loc, result[max_loc[1], max_loc[0]]))
+
+        # Select the result with the highest correlation score
+        best_result = max(results, key=lambda x: x[2])
+
+        # Extract the relevant information
+        best_scale, best_loc, _ = best_result
+
+        # Calculate the size of the template in the original image
+        h, w = template_gray.shape
+        best_size = (int(w * best_scale), int(h * best_scale))
+
+        # Draw a rectangle around the matched area
+        # cv.rectangle(main_image, best_loc, (best_loc[0] + best_size[0], best_loc[1] + best_size[1]), (0, 255, 0), 2)
+
+        threshold_percentage = 0.3799999999999999
+        
+        # Get the correlation coefficient (similarity measure)
+        correlation_coefficient = result[max_loc[1], max_loc[0]]
+
+        # Extract the subimage
+        subimage = main_image[best_loc[1]:best_loc[1] + best_size[1], best_loc[0]:best_loc[0] + best_size[0]]
+        self.cv.imwrite("subimage.png", subimage)
+        subimage = self.cv.imread("subimage.png")
+
+        # Check if the correlation coefficient is above the threshold
+        if correlation_coefficient <= threshold_percentage:
+            print(f"Template found with similarity: {correlation_coefficient}")
+            return subimage
+        else:
+            raise Exception(f"threshold ({correlation_coefficient}) is higher than {threshold_percentage}")
+
+        # Draw a rectangle around the matched area
+        # cv.rectangle(main_image, best_loc, (best_loc[0] + best_size[0], best_loc[1] + best_size[1]), (0, 255, 0), 2)
+
+        threshold_percentage = _confidence
+    
+        # Get the correlation coefficient (similarity measure)
+        correlation_coefficient = result[max_loc[1], max_loc[0]]
+
+        # Check if the correlation coefficient is above the threshold
+        if correlation_coefficient >= threshold_percentage:
+            print(f"Template found with similarity: {correlation_coefficient}")
+            return subimage
+        else:
+            raise Exception(f"threshold ({correlation_coefficient}) is lower than {threshold_percentage}")

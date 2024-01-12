@@ -1,7 +1,6 @@
 from random import randint
 from time import sleep
-
-from numpy import choose
+from time import sleep
 
 def loop(self, _func=None, _tooltip="<no tooltip>", _tries=5, _delay=2, _fullerror=True, _noerror=False, _noprint=False):
 
@@ -42,7 +41,8 @@ def loop(self, _func=None, _tooltip="<no tooltip>", _tries=5, _delay=2, _fullerr
             state = False
     return state
         
-
+def pause():
+    input("press any key to continue...")
 def f_write(_filename, _content, _encoding="utf-8-sig"):
     file = open(_filename, "w", encoding=_encoding)
     file.write(str(_content))
@@ -81,3 +81,19 @@ def f_read_lines(filename):
 def get_time(arg=None):
     import datetime
     return f" {datetime.date.today().year}-{datetime.date.today().month}-{datetime.date.today().day}-{datetime.datetime.now().hour}-{datetime.datetime.now().minute}-{datetime.datetime.now().second}"
+
+def log(*args, _heading=False):
+    if(_heading):
+        print()
+        print("----------------", *args, "----------------")
+        print()
+    else:
+        print("--------", *args)
+
+def wait(_seconds):
+    i = 0
+    while i < _seconds:
+        log(f"waiting...({i})")
+        sleep(1)
+        i+=1
+

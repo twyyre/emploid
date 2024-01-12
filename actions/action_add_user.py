@@ -19,15 +19,18 @@ def action_add_user(emp, _name, _username, _email, _mobile, _password, _type):
    
     #
     def func_(emp):
-        btn_list = emp.locate_all(element_dashboard_btns)
+        # btn_list = emp.locate_all(element_dashboard_btns)
+        btn_list = emp.locate(element_user_management)
 
         if(btn_list):
-            emp.click(btn_list[2], _tooltip="click on user management button")
+            # emp.click(btn_list[2], _tooltip="click on user management button")
+            emp.click(btn_list, _tooltip="click on user management button")
         else:
             raise Exception("could not detect btns")
     emp.promise(_func=func_)
     emp.click(element_user_add, "click user add btn")
     emp.click(user_type, "choose user type")
+    # input()
     if(_type==0):
         emp.click(element_user_edit_branch_inpt, "click on branch input")
         emp.click(element_user_add_branch_option_one, "choose branch option")

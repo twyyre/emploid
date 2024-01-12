@@ -1,0 +1,1 @@
+element_accept_btn = "//a[contains(@href, 'linkpart')]"
