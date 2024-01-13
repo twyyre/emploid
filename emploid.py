@@ -1,3 +1,4 @@
+import os
 from os import listdir
 from time import sleep
 from modules.taskman.taskman import Taskman
@@ -13,10 +14,18 @@ from api import API
 import tools
 from constants import *
 import pyperclip as clip
+import subprocess as sp
+import sys
+from appium import webdriver as AppiumDriver
+from appium.webdriver.common.appiumby import AppiumBy as By
+from appium.options.android import UiAutomator2Options # Import Appium UiAutomator2 driver for Android platforms (AppiumOptions)
+from appium.options.common import AppiumOptions
+from appium.webdriver.common.touch_action import TouchAction
+from appium.webdriver.extensions.android.nativekey import AndroidKey as ak
 
 class Emploid:
 
-    def __init__(self) -> None:
+    def __init__(self, _driver_type=SETTINGS_USE_PYAUTOGUI) -> None:
         
         self.api = API()
         self.confidence=0.77
@@ -31,14 +40,21 @@ class Emploid:
         self.element_count = 0
         self.steps = []
         self.internal_path = "elements/"
-
+        self.driver_type = _driver_type if _driver_type is not None else SETTINGS_USE_PYAUTOGUI
+        self.driver = None if self.driver_type==SETTINGS_USE_PYAUTOGUI else AppiumDriver()
         # self.average_scroll_distance = 50
         self.keys = self.pa.KEYBOARD_KEYS
 
         # if(self.screen_get_size()!=(1920, 1080)): #this is no longer needed because elements now can be detected regardless of resolution
         #     raise Exception("resolution is not supported. Screen Resolution must be (1920x1080).")
-        
-        self.load_elements()
+        load_entities_function = self.load_elements if self.driver_type==SETTINGS_USE_PYAUTOGUI else self.load_identifiers
+        load_entities_function()
+        self.appium_server = None
+        self.emu = None
+        # if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+        #     self.load_elements()
+        # if(self.driver_type==SETTINGS_USE_APPIUM or self.driver_type==SETTINGS_USE_SELENIUM):
+        #     self.load_identifiers()
         # self.taskman = Taskman()
         # self.beholder = self.taskman.start_task("record.py")
 
@@ -73,8 +89,6 @@ class Emploid:
     
     def load_identifiers(self):
         import identifiers as id
-        for item in id:
-            print(item)
 
     def get_steps(self) -> list[str]:
         self.steps = listdir(self.internal_path)
@@ -148,7 +162,6 @@ class Emploid:
     
     def scale_to(self, _img1, _img2):
         #scales image 1 to image 2 size
-        
         image3 = cv.resize(_img1, (_img2.shape[1], _img2.shape[0]), cv.INTER_LINEAR_EXACT)
         
         if(image3.shape == _img2.shape):
@@ -199,11 +212,15 @@ class Emploid:
                 pass
 
         return elements
-        
+    
     def promise_element(self, _ent, _confidence=0.9):
         #This function needs modification, it doesn't raise an exception when the element is not found where it should. Will look into it later.
-        import pyscreeze
-        is_element = isinstance(_ent, pyscreeze.Box)
+        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+            import pyscreeze
+            is_element = isinstance(_ent, pyscreeze.Box)
+        if(self.driver_type==SETTINGS_USE_SELENIUM):
+            from selenium.webdriver.remote.webelement import WebElement
+            is_element = isinstance(_ent, WebElement)
         if(is_element):
             return _ent
         else:
@@ -217,7 +234,7 @@ class Emploid:
                     print("could not detect element")
                     return False
             return self.promise(_func=func_, _tooltip=f"promising element...")
-        
+    
     def keyboard_paste(self, _str) -> None:
         clip.copy(_str)
         self.keyboard_hotkey("ctrl", "v")
@@ -451,7 +468,7 @@ class Emploid:
         prog = Application().start(prog_path)
         return prog#Application(backend='uia').connect(path=program_name, title_re='New Tab')
     
-    def chrome_run(self, _url: str="", _incognito=False, _maximized=True, _use_selenium=False) -> None:
+    def chrome_run(self, _url: str="", _incognito=False, _maximized=True) -> None:
         if(_incognito):
             _incognito = "-incognito"
         else:
@@ -460,7 +477,7 @@ class Emploid:
             _maximized = "--start-maximized"
         else:
             _maximized = ""
-        if(_use_selenium):
+        if(self.driver_type==SETTINGS_USE_SELENIUM):
             from selenium import webdriver
             from selenium.webdriver.chrome.service import Service
             from selenium.webdriver.chrome.options import Options as chromeOptions
@@ -470,7 +487,7 @@ class Emploid:
             self.driver = webdriver.Chrome(options=chromeoptions, service=Service(executable_path="drivers/chromedriver.exe"))
             # self.driver.maximize_window()
             self.driver.get(TEST_URL)
-        else:
+        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             from pywinauto import Desktop, Application
             chrome_dir = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
             page_url = _url
@@ -593,6 +610,46 @@ class Emploid:
 
     def random_string(self, _length):
         pass
+
+    def appium_server_start(self):
+        print("starting appium server...")
+        info = sp.STARTUPINFO()
+        info.dwFlags = sp.STARTF_USESHOWWINDOW
+        info.wShowWindow = 1
+        self.appium_server = sp.Popen([sys.executable, APPIUM_SERVER_EXE], shell=True, startupinfo=info, creationflags=sp.CREATE_NEW_CONSOLE)
+        return self.appium_server
+    
+    def appium_emulator_start(self):
+        print("starting emulator...")
+        self.emu = sp.Popen(APPIUM_COMMAND_EMULATOR_START, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+        return self.emu
+    
+    def appium_connect(self):
+        capabilities = dict(
+            platformName='Android',
+            automationName='uiautomator2',
+            deviceName='Samsung S9',
+            appPackage='',
+            appActivity='',
+            language='en',
+            locale='US'
+        )
+        while True:
+            try:
+                print("connecting to appium server...")
+                self.driver = AppiumDriver.Remote(APPIUM_SERVER_URL, options=AppiumOptions().load_capabilities(capabilities))
+                break
+            except:
+                pass
+
+    def appium_server_stop(self):
+        if(self.appium_server):
+            self.appium_server.kill()
+            # os.system(f"pkill -9 -f appium")
+
+    def appium_emulator_stop(self):
+        if(self.emu):
+            self.emu.kill()
 
     def generate_random_string(length):
         from random import choice
