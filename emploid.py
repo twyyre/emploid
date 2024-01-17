@@ -20,7 +20,7 @@ from appium import webdriver as AppiumDriver
 from appium.webdriver.common.appiumby import AppiumBy as By
 from appium.options.android import UiAutomator2Options # Import Appium UiAutomator2 driver for Android platforms (AppiumOptions)
 from appium.options.common import AppiumOptions
-from appium.webdriver.common.touch_action import TouchAction
+from appium.webdriver.common.touch_action import TouchAction as AppiumAction
 from appium.webdriver.extensions.android.nativekey import AndroidKey as ak
 
 class Emploid:
@@ -218,11 +218,17 @@ class Emploid:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             import pyscreeze
             is_element = isinstance(_ent, pyscreeze.Box)
+            return  _ent if is_element else None
         if(self.driver_type==SETTINGS_USE_SELENIUM):
             from selenium.webdriver.remote.webelement import WebElement
             is_element = isinstance(_ent, WebElement)
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            from appium.webdriver.webelement import WebElement
+            is_element = isinstance(_ent, WebElement)
+
         if(is_element):
             return _ent
+        
         else:
             def func_(self):
                 print("locating element...")
@@ -236,13 +242,24 @@ class Emploid:
             return self.promise(_func=func_, _tooltip=f"promising element...")
     
     def keyboard_paste(self, _str) -> None:
-        clip.copy(_str)
-        self.keyboard_hotkey("ctrl", "v")
+        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+            clip.copy(_str)
+            self.keyboard_hotkey("ctrl", "v")
 
     def press(self, _btn: int =0) -> None:
-        btns = ['left', 'right', 'middle' ]
-        btn = btns[_btn]
-        self.pa.click(button=btn)
+        
+        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+            btns = ['left', 'right', 'middle' ]
+            self.pa.click(button=btn)
+            btn = btns[_btn]
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            return AppiumAction.press(_btn).perform()
+            
+        if(self.driver_type==SETTINGS_USE_SELENIUM):
+            raise Exception("not yet supported")
+
+    def swipe(self):
+        self.driver.swipe(470, 1400, 470, 0, 400)
         
     def click(self, _elm, _tooltip="Click", _tries=3, _delay=1, _confidence=0.8, _exit=False) -> bool:
         def func_(self):
@@ -328,7 +345,12 @@ class Emploid:
         self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
     
     def keyboard_press(self, _key) -> None:
-        self.pa.press(_key)
+        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+            self.pa.press(_key)
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            self.driver.press_keycode(ak.ENTER)
+        if(self.driver_type==SETTINGS_USE_SELENIUM):
+            raise Exception("not supported right now")
 
     def keyboard_hold(self, _key) -> None:
         self.pa.keyDown(_key)
@@ -339,25 +361,32 @@ class Emploid:
     def keyboard_hotkey(self, *_keys) -> None:
         self.pa.hotkey(*_keys) 
 
+    def find_element(self, _xpath, _method=By.XPATH):
+        return self.driver.find_element(_method, _xpath)
+    
+    def find_elements(self, _xpath, _method=By.XPATH):
+        return self.driver.find_elements(_method, _xpath)
+    
     def locate(self, _elm, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True): 
         mode = _mode
         
-        if(mode==DETECTION_MODE_REGULAR):
-            return self.pa.locateOnScreen(_elm, confidence=_confidence, grayscale=_grayscale)#, region=(0,0, 300, 400))
-        elif(mode==DETECTION_MODE_TEMPLATE_MATCHING):
-            #currently, in order for this function to work it MUST save a copy of the screenshot to storage and then load it again. Will look into this in the future and try to find a way to load it from memory that works
-            raise Exception("not supported at the moment")
-            _screen = self.pa.screenshot().save("elements/haystack.png")
-            _screen = self.import_image("haystack.png")
-            _elm = cv.imread("needle.png", cv.IMREAD_GRAYSCALE)
-            _screen = cv.imread("haystack.png", cv.IMREAD_GRAYSCALE)
-            _elm = self.multi_scale_template_matching(_screen, _elm, _confidence=_confidence)
-            print("needle:", type(_elm))
-            print("haystack:", type(_screen))
-            tools.pause()
-            _elm = self.detect_template(self, _elm, _screen)
-            cv.imwrite("result.png", _elm)
-            _elm = cv.imread("result.png")
+        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+            if(mode==DETECTION_MODE_REGULAR):
+                return self.pa.locateOnScreen(_elm, confidence=_confidence, grayscale=_grayscale)#, region=(0,0, 300, 400))
+            elif(mode==DETECTION_MODE_TEMPLATE_MATCHING):
+                #currently, in order for this function to work it MUST save a copy of the screenshot to storage and then load it again. Will look into this in the future and try to find a way to load it from memory that works
+                raise Exception("not supported at the moment")
+                _screen = self.pa.screenshot().save("elements/haystack.png")
+                _screen = self.import_image("haystack.png")
+                _elm = cv.imread("needle.png", cv.IMREAD_GRAYSCALE)
+                _screen = cv.imread("haystack.png", cv.IMREAD_GRAYSCALE)
+                _elm = self.multi_scale_template_matching(_screen, _elm, _confidence=_confidence)
+                print("needle:", type(_elm))
+                print("haystack:", type(_screen))
+                tools.pause()
+                _elm = self.detect_template(self, _elm, _screen)
+                cv.imwrite("result.png", _elm)
+                _elm = cv.imread("result.png")
 
     def locate_in_region(self, _elm, _x, _y, _xx, _yy, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True): 
         mode = _mode
@@ -375,15 +404,19 @@ class Emploid:
             cv.destroyAllWindows()
             
     def locate_all(self, _elm, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True):
+        """Locates all elements on the current view."""
         mode = _mode
-        if(mode==DETECTION_MODE_REGULAR):
-            return list(self.pa.locateAllOnScreen(_elm, confidence=_confidence, grayscale=_grayscale))
-        elif(mode==DETECTION_MODE_TEMPLATE_MATCHING):
-            raise Exception("not supported at the moment")
-            #currently, in order for this function to work it MUST save a copy of the screenshot to storage and then load it again. Will look into this in the future and try to find a way to load it from memory that works
-            _screen = self.pa.screenshot().save("elements/haystack.png")
-            _screen = self.import_image("haystack.png")
-            _elm = self.multi_scale_template_matching(_screen, _elm)
+        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+            if(mode==DETECTION_MODE_REGULAR):
+                return list(self.pa.locateAllOnScreen(_elm, confidence=_confidence, grayscale=_grayscale))
+            elif(mode==DETECTION_MODE_TEMPLATE_MATCHING):
+                raise Exception("not supported at the moment")
+                #currently, in order for this function to work it MUST save a copy of the screenshot to storage and then load it again. Will look into this in the future and try to find a way to load it from memory that works
+                _screen = self.pa.screenshot().save("elements/haystack.png")
+                _screen = self.import_image("haystack.png")
+                _elm = self.multi_scale_template_matching(_screen, _elm)
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            return self.find_elements("//*")
 
     def contains_arabic_letters(self, input_string):
         #written by chat-gpt
@@ -568,6 +601,7 @@ class Emploid:
                 _tries -= 1
             try:
                 result = _func(self, *_args)
+                #insert Scribe row
                 if(result):
                     col = "btn-success"
                 else:
@@ -643,13 +677,23 @@ class Emploid:
                 pass
 
     def appium_server_stop(self):
+        """this currently does not work for some reason"""
         if(self.appium_server):
             self.appium_server.kill()
-            # os.system(f"pkill -9 -f appium")
+            os.system(f"taskkill /F /IM node.exe")
 
     def appium_emulator_stop(self):
         if(self.emu):
             self.emu.kill()
+
+    def move_to(self, _element):
+        return AppiumAction.move_to(_element).perform()
+    
+    def mouse_release(self):
+        AppiumAction.release().perform()
+        
+    def activate_app(self, _app):
+        return self.driver.activate_app(_app)
 
     def generate_random_string(length):
         from random import choice

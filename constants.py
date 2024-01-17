@@ -33,5 +33,5 @@ SETTINGS_USE_APPIUM = 2
 SETTINGS_USE_PYAUTOGUI= 3
 APPIUM_PATH = "C:\\Users\\a.almuntasir\\AppData\\Roaming\\npm\\appium.cmd"
 APPIUM_SERVER_URL = "http://localhost:4723"
-APPIUM_COMMAND_EMULATOR_START = r'cd C:\\Users\\a.almuntasir\AppData\\Local\Android\Sdk\\emulator && emulator -avd Pixel_C_API_30_2'
+APPIUM_COMMAND_EMULATOR_START = r'cd C:\\Users\\a.almuntasir\AppData\\Local\Android\Sdk\\emulator && emulator -avd bp_emu'
 APPIUM_SERVER_EXE = "appium_server.py"
