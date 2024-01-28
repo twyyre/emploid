@@ -41,7 +41,7 @@ class Emploid:
         self.steps = []
         self.internal_path = "elements/"
         self.driver_type = _driver_type if _driver_type is not None else SETTINGS_USE_PYAUTOGUI
-        self.driver = None if self.driver_type==SETTINGS_USE_PYAUTOGUI else AppiumDriver()
+        self.driver = None if self.driver_type==SETTINGS_USE_PYAUTOGUI else AppiumDriver
         # self.average_scroll_distance = 50
         self.keys = self.pa.KEYBOARD_KEYS
 
@@ -266,7 +266,10 @@ class Emploid:
             elm = _elm
             elm = self.promise_element(_elm, _confidence=_confidence)
             if(elm):
-                self.pa.click(elm)
+                if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+                    self.pa.click(elm)
+                if(self.driver_type==SETTINGS_USE_APPIUM):
+                    elm.click()
                 return True
             else:
                 raise Exception("could not click element")
@@ -403,7 +406,7 @@ class Emploid:
             cv.waitKey(0)
             cv.destroyAllWindows()
             
-    def locate_all(self, _elm, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True):
+    def locate_all(self, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True):
         """Locates all elements on the current view."""
         mode = _mode
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):

@@ -1,4 +1,3 @@
-import unittest
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 from appium import webdriver
@@ -14,10 +13,10 @@ import os
 from constants import *
 from emploid import Emploid
 
-emp = Emploid()
+emp = Emploid(_driver_type=SETTINGS_USE_APPIUM)
 
+emp.appium_emulator_start()
 emp.appium_server_start()
-# emp.appium_emulator_start()
 emp.appium_connect()
 
 print("started test")
@@ -26,11 +25,17 @@ emp.activate_app('com.lib.libank')
 print("sleeping...")
 sleep(10)
 #
+# from classes.element_class import EmploidElement as e
+# result = e(emp, """//*[@text="uinpt"]""")
+# print(result)
+# exit()
+# emp.click("""//*[@text="uinpt"]""")
 username_inpt = emp.find_element("""//*[@text="uinpt"]""")
 username_inpt.click()
 sleep(1)
 username_inpt.clear()
 username_inpt.send_keys("ayoubqa")
+
 #
 password_inpt = emp.find_element("""//*[@text="pinpt"]""")
 password_inpt.click()
@@ -42,6 +47,15 @@ allelms = emp.locate_all()
 for elm in allelms:
     if("button" in elm.get_attribute("class").lower()):
         elm.click()
+
+allelms = emp.locate_all()
+for elm in allelms:
+    print(elm.get_attribute('class'), elm.text)
+
+
+# check = emp.click(element_password_show_btn, "click on show password")
+
+# check = emp.input_into(user_name, element_username_input, "input username")
 
 
 # sleep(2)
