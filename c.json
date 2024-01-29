@@ -1,9 +1,0 @@
-{
-    "platformName":"Android",
-    "automationName":"uiautomator2",
-    "deviceName":"Samsung S9",
-    "appPackage":"",
-    "appActivity":"",
-    "language":"en",
-    "locale":"US"
-        }

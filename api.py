@@ -55,5 +55,3 @@ class API:
             "stringPermissions": "string"
             }
         return self.post(_url="http://10.10.20.46:9832/Pages/UpdateUser?culture=ar-LY", _params=params, _json=_json)
-        
-    
