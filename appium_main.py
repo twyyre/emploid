@@ -30,11 +30,7 @@ sleep(10)
 # print(result)
 # exit()
 # emp.click("""//*[@text="uinpt"]""")
-username_inpt = emp.find_element("""//*[@text="uinpt"]""")
-username_inpt.click()
-sleep(1)
-username_inpt.clear()
-username_inpt.send_keys("ayoubqa")
+username_inpt = emp.input_into("ayoubqa", """//*[@text="uinpt"]""")
 
 #
 password_inpt = emp.find_element("""//*[@text="pinpt"]""")

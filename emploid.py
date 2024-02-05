@@ -1,32 +1,38 @@
 import os
+import sys
 from os import listdir
 from time import sleep
-from modules.taskman.taskman import Taskman
 import cv2 as cv
 import numpy as np
-import random
 import string
 import pyautogui as pa
 import numpy as np
-from api import API
-from modules.scribe.scribe import Scribe
-from api import API
-import tools
-from constants import *
 import pyperclip as clip
 import subprocess as sp
-import sys
+
+#used modules
 from appium import webdriver as AppiumDriver
 from appium.webdriver.common.appiumby import AppiumBy as By
 from appium.options.android import UiAutomator2Options # Import Appium UiAutomator2 driver for Android platforms (AppiumOptions)
 from appium.options.common import AppiumOptions
 from appium.webdriver.common.touch_action import TouchAction as AppiumAction
 from appium.webdriver.extensions.android.nativekey import AndroidKey as ak
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+#my modules
+from constants import *
+from modules.scribe.scribe import Scribe
+from modules.taskman.taskman import Taskman
+from api import API
+import tools
 
 class Emploid:
 
     def __init__(self, _driver_type=SETTINGS_USE_PYAUTOGUI) -> None:
         
+        self.driver_type = _driver_type if _driver_type is not None else SETTINGS_USE_PYAUTOGUI
+        self.resolve_imports() #imports necessary libraries depending on used driver type
         self.api = API()
         self.confidence=0.77
         self.pa = pa
@@ -40,7 +46,6 @@ class Emploid:
         self.element_count = 0
         self.steps = []
         self.internal_path = "elements/"
-        self.driver_type = _driver_type if _driver_type is not None else SETTINGS_USE_PYAUTOGUI
         self.driver = None if self.driver_type==SETTINGS_USE_PYAUTOGUI else AppiumDriver
         # self.average_scroll_distance = 50
         self.keys = self.pa.KEYBOARD_KEYS
@@ -62,30 +67,44 @@ class Emploid:
         # self.taskman.kill_task(self.beholder, _delay=2)
         pass
 
+    def resolve_imports(self):
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            from appium import webdriver as AppiumDriver
+            from appium.webdriver.common.appiumby import AppiumBy as By
+            from appium.options.android import UiAutomator2Options # Import Appium UiAutomator2 driver for Android platforms (AppiumOptions)
+            from appium.options.common import AppiumOptions
+            from appium.webdriver.common.touch_action import TouchAction as AppiumAction
+            from appium.webdriver.extensions.android.nativekey import AndroidKey as ak
+        if(self.driver_type==SETTINGS_USE_SELENIUM):
+            from selenium import webdriver
+            from selenium.webdriver.common.by import By
+            from selenium.webdriver.common.keys import Keys
+
     def show(self, *_args) -> None:
         for arg in _args:
             print("----", arg)
         print("\n------------------------")
 
-    def load_elements(self):
-        import os
-        import tools
-        directories = list(os.walk('elements'))
+    def load_elements(self) -> None:
+        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+            directories = list(os.walk('elements'))
 
-        with(open("load_elements.py", 'w', encoding='utf-8') as f):
-            f.write("from emploid import Emploid\nimport cv2 as cv\nfrom api import API\nfrom time import sleep\nemp = Emploid()\n")
-            if(len(directories)):
-                for dir in directories:
-                    for png in dir[2]:
-                        if(png[-4:]==".png"):
-                            line = "element_"+png[:-4]+"=emp.import_image(\""+dir[0].replace("\\", "/")+"/"+png+"\", cv.IMREAD_GRAYSCALE)\n"
-                            line = line.replace("elements/", "")
-                            f.write(line)
-                else:
-                    print("failed to load [element_"+png[:-4]+"]")
-        content = tools.f_read("load_elements.py")
+            with(open("load_elements.py", 'w', encoding='utf-8') as f):
+                f.write("from emploid import Emploid\nimport cv2 as cv\nfrom api import API\nfrom time import sleep\nemp = Emploid()\n")
+                if(len(directories)):
+                    for dir in directories:
+                        for png in dir[2]:
+                            if(png[-4:]==".png"):
+                                line = "element_"+png[:-4]+"=emp.import_image(\""+dir[0].replace("\\", "/")+"/"+png+"\", cv.IMREAD_GRAYSCALE)\n"
+                                line = line.replace("elements/", "")
+                                f.write(line)
+                    else:
+                        print("failed to load [element_"+png[:-4]+"]")
+            content = tools.f_read("load_elements.py")
 
-        tools.f_write("load_elements.py", content)
+            tools.f_write("load_elements.py", content)
+        else:
+            raise Exception("driver type not supported")
     
     def load_identifiers(self):
         import identifiers as id
@@ -336,13 +355,17 @@ class Emploid:
                 clicked = self.click(_elm,  _confidence=_confidence, _tooltip=_tooltip)
                 if(clicked):
                     if(self.contains_arabic_letters(_str)):
-                        print("string contains arabic letters")
+                        print(f"string ({_str}) contains arabic letters")
                         clip.copy(_str)
-                        clip.paste()
+                        clip.paste() #this needs testing with appium
                         # self.keyboard_hotkey("ctrl", "v")
-
                     else:
-                        self.pa.write(_str)
+                        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+                            self.pa.write(_str)
+                        if(self.driver_type==SETTINGS_USE_APPIUM):
+                            sleep(0.5)
+                            _elm.clear()
+                            _elm.send_keys(_str)
                     return True
             raise Exception("could not input into element")
         self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
@@ -390,6 +413,8 @@ class Emploid:
                 _elm = self.detect_template(self, _elm, _screen)
                 cv.imwrite("result.png", _elm)
                 _elm = cv.imread("result.png")
+        if(self.driver_Type==SETTINGS_USE_APPIUM):
+            return self.find_element(_elm)
 
     def locate_in_region(self, _elm, _x, _y, _xx, _yy, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True): 
         mode = _mode
