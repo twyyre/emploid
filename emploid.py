@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from os import listdir
@@ -232,7 +233,7 @@ class Emploid:
 
         return elements
     
-    def promise_element(self, _ent, _confidence=0.9):
+    def promise_element(self, _ent, _mode=None, _tries=3, _delay=1, _confidence=0.9, _tooltip=f"promising element..."):
         #This function needs modification, it doesn't raise an exception when the element is not found where it should. Will look into it later.
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             import pyscreeze
@@ -247,7 +248,6 @@ class Emploid:
 
         if(is_element):
             return _ent
-        
         else:
             def func_(self):
                 print("locating element...")
@@ -258,7 +258,7 @@ class Emploid:
                 else:
                     print("could not detect element")
                     return False
-            return self.promise(_func=func_, _tooltip=f"promising element...")
+            return self.promise(_func=func_, _tries=_tries, _delay=_delay, _tooltip=_tooltip)
     
     def keyboard_paste(self, _str) -> None:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
@@ -346,29 +346,35 @@ class Emploid:
         import inspect
         return str(inspect.stack()[_level][3])
 
-    def input_into(self, _str, _elm=None, _tooltip="Input Text into Element", _confidence=0.77, _tries=3, _delay=1, _exit=False) -> bool:
-        #inputs text into whatever element is active on screen.
+    def input_into(self, _str, _elm=None, _confidence=0.77, _tries=3, _delay=1, _exit=False, _tooltip="Input Text into Element") -> bool:
+        """
+        input text into element.
+        """
         #if an element is passed, it clicks it before passing the text
         #THIS FUNCTION CURRENTLY WORKS WITH ELEMENTS ONLY. ELEMENTS MUST BE PASSED INTO IT.
         def func_(self):
             if(_elm is not None):
-                clicked = self.click(_elm,  _confidence=_confidence, _tooltip=_tooltip)
+                clicked = self.click(_elm,  _confidence=_confidence, _tooltip=f"attempting to click element: {_elm}")
                 if(clicked):
-                    if(self.contains_arabic_letters(_str)):
-                        print(f"string ({_str}) contains arabic letters")
-                        clip.copy(_str)
-                        clip.paste() #this needs testing with appium
-                        # self.keyboard_hotkey("ctrl", "v")
-                    else:
-                        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+                    if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+                        if(self.contains_arabic_letters(_str)):
+                            print(f"string ({_str}) contains arabic letters")
+                            clip.copy(_str)
+                            clip.paste() #this needs testing with appium
+                            # self.keyboard_hotkey("ctrl", "v")
+                        else:
                             self.pa.write(_str)
-                        if(self.driver_type==SETTINGS_USE_APPIUM):
-                            sleep(0.5)
-                            _elm.clear()
-                            _elm.send_keys(_str)
+                    if(self.driver_type==SETTINGS_USE_APPIUM):
+                        sleep(1)
+                        _elm.clear()
+                        _elm.send_keys(_str)
                     return True
             raise Exception("could not input into element")
         self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
+
+    def submit(self, _str, _elm, _tooltip=""):
+        self.input_into(_str=_str, _elm=self.locate(_elm), _tooltip=_tooltip)
+        self.enter()
     
     def keyboard_press(self, _key) -> None:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
@@ -377,6 +383,22 @@ class Emploid:
             self.driver.press_keycode(ak.ENTER)
         if(self.driver_type==SETTINGS_USE_SELENIUM):
             raise Exception("not supported right now")
+        
+    def enter(self):
+        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
+            # self.pa.press(_key)
+            pass
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            self.driver.press_keycode(ak.ENTER)
+            pass
+        if(self.driver_type==SETTINGS_USE_SELENIUM):
+            raise Exception("not supported right now")
+        
+    def display_elements(self):
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            allelms = self.locate_all()
+            for elm in allelms:
+                print(elm.get_attribute('class'), elm.text)
 
     def keyboard_hold(self, _key) -> None:
         self.pa.keyDown(_key)
@@ -393,7 +415,7 @@ class Emploid:
     def find_elements(self, _xpath, _method=By.XPATH):
         return self.driver.find_elements(_method, _xpath)
     
-    def locate(self, _elm, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True): 
+    def locate(self, _elm, _confidence=0.9, _mode=None, _grayscale=True): 
         mode = _mode
         
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
@@ -413,8 +435,9 @@ class Emploid:
                 _elm = self.detect_template(self, _elm, _screen)
                 cv.imwrite("result.png", _elm)
                 _elm = cv.imread("result.png")
-        if(self.driver_Type==SETTINGS_USE_APPIUM):
-            return self.find_element(_elm)
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            if "com." and ":id" in _elm.lower(): _mode=By.ID
+            return self.find_element(_elm, _method=_mode)
 
     def locate_in_region(self, _elm, _x, _y, _xx, _yy, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True): 
         mode = _mode
@@ -564,9 +587,7 @@ class Emploid:
     def email_generate(self):
         
         self.show("getting email...")
-
         while True:
-            
             try:
                 from pymailtm import MailTm, Account, Message
                 return MailTm().get_account()
@@ -587,7 +608,7 @@ class Emploid:
 
     def email_find_code(self, n, s) -> str:
         import re
-        result = re.search('\d{%s}'%n, s)
+        result = re.search('\\d{%s}'%n, s)
         return result.group(0) if result else result
 
     def send_get(self, _url, _params=None, _json=True):
@@ -687,15 +708,8 @@ class Emploid:
         return self.emu
     
     def appium_connect(self):
-        capabilities = dict(
-            platformName='Android',
-            automationName='uiautomator2',
-            deviceName='Samsung S9',
-            appPackage='',
-            appActivity='',
-            language='en',
-            locale='US'
-        )
+        with open("config/emu_config.json", 'r') as emu_config:
+            capabilities = json.load(emu_config)
         while True:
             try:
                 print("connecting to appium server...")
