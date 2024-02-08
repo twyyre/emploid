@@ -35,3 +35,5 @@ APPIUM_PATH = "C:\\Users\\a.almuntasir\\AppData\\Roaming\\npm\\appium.cmd"
 APPIUM_SERVER_URL = "http://localhost:4723"
 APPIUM_COMMAND_EMULATOR_START = r'cd C:\\Users\\a.almuntasir\AppData\\Local\Android\Sdk\\emulator && emulator -avd bp_emu'
 APPIUM_SERVER_EXE = "appium_server.py"
+APP_FACEBOOK_LITE = "com.facebook.lite"
+APP_GOOGLE_CHROME = "com.android.chrome"

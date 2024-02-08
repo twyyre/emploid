@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 from os import listdir
 from time import sleep
@@ -233,7 +234,31 @@ class Emploid:
 
         return elements
     
+    def determine_entity(self, _ent):
+        """determines whether passed ``_ent`` is a webelement, an xpath, a css selector, or a package name."""
+        # Check if it's a package name
+        if '.' in _ent:
+            return "Package name"
+        
+        # Check if it's an XPath expression
+        if re.match(r'^//', _ent):
+            return "XPath expression"
+        
+        # Check if it's a CSS selector
+        if re.match(r'^[.#]?[-_a-zA-Z0-9]+', _ent):
+            return "CSS selector"
+        
+        # Check if it's a web element (assuming you have a way to check this, e.g., using Selenium)
+        # This part depends on how you determine whether a string is a web element
+        
+        # If none of the above matches, return unknown
+        return None
+
     def promise_element(self, _ent, _mode=None, _tries=3, _delay=1, _confidence=0.9, _tooltip=f"promising element..."):
+        """
+        this function "promises" to return an element if it is possible. Whether you pass it a screenshot, an xpath, or a package Id.\n
+        it can try as many ``_tries`` as possible to find the element with a ``_delay`` between each attempt.
+        """
         #This function needs modification, it doesn't raise an exception when the element is not found where it should. Will look into it later.
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             import pyscreeze
@@ -261,6 +286,7 @@ class Emploid:
             return self.promise(_func=func_, _tries=_tries, _delay=_delay, _tooltip=_tooltip)
     
     def keyboard_paste(self, _str) -> None:
+        """copies the specified ``_str`` into the clipboard and pastes it using ``CRTL + V``."""
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             clip.copy(_str)
             self.keyboard_hotkey("ctrl", "v")
@@ -279,8 +305,14 @@ class Emploid:
 
     def swipe(self):
         self.driver.swipe(470, 1400, 470, 0, 400)
+
+    def check_installed(self, _package):
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            return self.driver.is_app_installed(_package)
+        raise Exception("method not supported for this driver type")
         
-    def click(self, _elm, _tooltip="Click", _tries=3, _delay=1, _confidence=0.8, _exit=False) -> bool:
+    def click(self, _elm, _tries=3, _delay=1, _confidence=0.8, _exit=False, _tooltip="") -> bool:
+        """clicks an element, promising to find it in the process."""
         def func_(self):
             elm = _elm
             elm = self.promise_element(_elm, _confidence=_confidence)
@@ -289,7 +321,7 @@ class Emploid:
                     self.pa.click(elm)
                 if(self.driver_type==SETTINGS_USE_APPIUM):
                     elm.click()
-                return True
+                return True, elm
             else:
                 raise Exception("could not click element")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
@@ -346,7 +378,7 @@ class Emploid:
         import inspect
         return str(inspect.stack()[_level][3])
 
-    def input_into(self, _str, _elm=None, _confidence=0.77, _tries=3, _delay=1, _exit=False, _tooltip="Input Text into Element") -> bool:
+    def input_into(self, _str, _elm=None, _confidence=0.77, _tries=3, _delay=1, _exit=False, _tooltip="") -> bool:
         """
         input text into element.
         """
@@ -354,7 +386,7 @@ class Emploid:
         #THIS FUNCTION CURRENTLY WORKS WITH ELEMENTS ONLY. ELEMENTS MUST BE PASSED INTO IT.
         def func_(self):
             if(_elm is not None):
-                clicked = self.click(_elm,  _confidence=_confidence, _tooltip=f"attempting to click element: {_elm}")
+                clicked, elm = self.click(_elm,  _confidence=_confidence)
                 if(clicked):
                     if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
                         if(self.contains_arabic_letters(_str)):
@@ -366,23 +398,27 @@ class Emploid:
                             self.pa.write(_str)
                     if(self.driver_type==SETTINGS_USE_APPIUM):
                         sleep(1)
-                        _elm.clear()
-                        _elm.send_keys(_str)
+                        elm.clear()
+                        elm.send_keys(_str)
                     return True
             raise Exception("could not input into element")
         self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    def submit(self, _str, _elm, _tooltip=""):
-        self.input_into(_str=_str, _elm=self.locate(_elm), _tooltip=_tooltip)
+    def submit(self, _str, _elm, _tooltip="submit text to an input field"):
+        self.input_into(_str=_str, _elm=_elm, _tooltip=_tooltip)
         self.enter()
+
+    def tap(self, _x, _y):
+        """taps a specific point on screen."""
+        return self.driver.tap([(_x, _y)])
     
     def keyboard_press(self, _key) -> None:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             self.pa.press(_key)
-        if(self.driver_type==SETTINGS_USE_APPIUM):
-            self.driver.press_keycode(ak.ENTER)
         if(self.driver_type==SETTINGS_USE_SELENIUM):
             raise Exception("not supported right now")
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            self.driver.press_keycode(_key)
         
     def enter(self):
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
@@ -436,7 +472,8 @@ class Emploid:
                 cv.imwrite("result.png", _elm)
                 _elm = cv.imread("result.png")
         if(self.driver_type==SETTINGS_USE_APPIUM):
-            if "com." and ":id" in _elm.lower(): _mode=By.ID
+            if "com." in _elm.lower() and ":id" in _elm.lower(): _mode=By.ID
+            if "//" in _elm.lower(): _mode=By.XPATH
             return self.find_element(_elm, _method=_mode)
 
     def locate_in_region(self, _elm, _x, _y, _xx, _yy, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True): 
@@ -695,6 +732,7 @@ class Emploid:
         pass
 
     def appium_server_start(self):
+        """Starts Appium Server\n"""
         print("starting appium server...")
         info = sp.STARTUPINFO()
         info.dwFlags = sp.STARTF_USESHOWWINDOW
@@ -703,16 +741,24 @@ class Emploid:
         return self.appium_server
     
     def appium_emulator_start(self):
+        """
+        Starts the android emulator at the path: APPIUM_COMMAND_EMULATOR_START.\n
+        You should probably start your emulator individually.
+        """
         print("starting emulator...")
         self.emu = sp.Popen(APPIUM_COMMAND_EMULATOR_START, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
         return self.emu
     
-    def appium_connect(self):
+    def appium_connect(self, _adb_connect=False):
+        """Connects to appium server, and subsequently, the emulator."""
         with open("config/emu_config.json", 'r') as emu_config:
             capabilities = json.load(emu_config)
         while True:
             try:
                 print("connecting to appium server...")
+                if(_adb_connect):
+                    #when connecting to the likes of bluestacks, the command adb connect needs to be run first
+                    pass
                 self.driver = AppiumDriver.Remote(APPIUM_SERVER_URL, options=AppiumOptions().load_capabilities(capabilities))
                 break
             except:
@@ -735,11 +781,12 @@ class Emploid:
         AppiumAction.release().perform()
         
     def activate_app(self, _app):
+        """activates an app that is installed on the emulator device."""
         return self.driver.activate_app(_app)
 
     def generate_random_string(length):
         from random import choice
-        """Generate a random string of the specified length"""
+        """generates a random string of a specified length"""
         # Define the characters that can be used in the random string
         characters = string.ascii_letters + string.digits
         # Generate the random string
@@ -815,3 +862,15 @@ class Emploid:
             return subimage
         else:
             raise Exception(f"threshold ({correlation_coefficient}) is lower than {threshold_percentage}")
+    def get_methods(self):
+        # Get a list of all attributes (including methods) of the class
+        methods = [method for method in dir(Emploid) if callable(getattr(Emploid, method))]
+
+        # Filter out built-in methods and attributes
+        methods = [method for method in methods if not method.startswith("__")]
+
+        # Print the list of methods
+        return methods
+    def print_methods(self):
+        methods = self.get_methods()
+        for method in methods: print(methods.index(method), method)
