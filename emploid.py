@@ -55,7 +55,7 @@ from emploid.modules.taskman.taskman import Taskman
 #sql server database connection module
 import pyodbc
 
-logger = logger.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class Emploid:
 
@@ -81,7 +81,7 @@ class Emploid:
 
                     #     tls.f_write(_filename=log_filename, _content="")
                         
-                    #     logger.basicConfig(filename=log_filename, encoding='utf-8', format='%(asctime)s %(message)s', level=logger.INFO)
+                    #     logging.basicConfig(filename=log_filename, encoding='utf-8', format='%(asctime)s %(message)s', level=logger.INFO)
                     #----------------------------------------------------------
                     log_message = str(f"emploid started '{_func.__name__}'").replace("'", "\"")
                     args_message = ""
@@ -122,6 +122,7 @@ class Emploid:
 
                 print("-----------------LOG ERROR-----------------")
                 logger.exception(e)
+                input()
                 
         return wrapper
     #----------------------------------------------------------
