@@ -953,6 +953,10 @@ class Emploid:
 
         # Perform the swipe action
         self.driver.swipe(start_x, start_y, end_x, end_y, duration=800)  # you can adjust the duration as needed
+        
+    @logger
+    def test_func(self):
+        print("this is a test function.")
 
     @logger
     def swipe_down(self, _distance=500):
