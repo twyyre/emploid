@@ -122,7 +122,6 @@ class Emploid:
 
                 print("-----------------LOG ERROR-----------------")
                 logger.exception(e)
-                input()
                 
         return wrapper
     #----------------------------------------------------------
@@ -151,7 +150,7 @@ class Emploid:
         self.create_reports_directory = True
         self.load_entities = False
         self.log_to_db = _log_to_db
-
+        self.logging = False
 
         #SET REPORT PATH-------------------------------------------
         if(self.create_reports_directory):
@@ -218,7 +217,6 @@ class Emploid:
         self.taskman = Taskman()
         
         self.by = SeleniumBy
-
         self.pa = pa
         self.cv = cv
         self.np = np
@@ -697,21 +695,36 @@ class Emploid:
         print("\n------------------------")
 
     @logger
-    def load_elements(self) -> None:
+    def load_elements(self, _dir='elements') -> None:
+        elm_dir = getcwd()+_dir
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
-            directories = list(os.walk('elements'))
-
+            directories = list(os.walk(elm_dir))
+            print("directories:\n", directories)
             with(open("load_elements.py", 'w', encoding='utf-8') as f):
-                f.write("from emploid import Emploid\nimport cv2 as cv\nfrom api import API\nfrom time import sleep\nemp = Emploid()\n")
+                f.write("from module.emploid.emploid import Emploid\nfrom module.emploid.constants import *\nimport cv2 as cv\nfrom time import sleep\nemp = Emploid(_driver_type=SETTINGS_USE_PYAUTOGUI)\n")
                 if(len(directories)):
-                    for dir in directories:
-                        for png in dir[2]:
-                            if(png[-4:]==".png"):
-                                line = "element_"+png[:-4]+"=emp.import_image(\""+dir[0].replace("\\", "/")+"/"+png+"\", cv.IMREAD_GRAYSCALE)\n"
-                                line = line.replace("elements/", "")
-                                f.write(line)
-                    else:
-                        print("failed to load [element_"+png[:-4]+"]")
+                    for current_dir in directories:
+                        try:
+                            print("current_dir[0]", current_dir[0])
+                            print("current_dir[1]", current_dir[1])
+                            print("current_dir[2]", current_dir[2])
+                            extension_index = -4
+                            for png in current_dir[2]:
+                                print("picture:", png)
+                                print("extension of file:", png[extension_index:])
+                                if(png[extension_index:].lower()==".png"):
+                                    line = "element_"+png[:extension_index]+"=emp.import_image(\""+current_dir[0].replace("\\", "/")+"/"+png+"\", cv.IMREAD_GRAYSCALE)\n"
+                                    line = line.replace(_dir, "")
+                                    f.write(line)
+                                    print("line:", line)
+                                else:
+                                    print("not a png")
+                            else:
+                                print(f"""failed to load [element_{png[:-4]}] from {current_dir[0]}""")
+                        except Exception as e:
+                            print("error:", e)
+                                
+                    
             content = tls.f_read("load_elements.py")
 
             tls.f_write("load_elements.py", content)
@@ -720,6 +733,7 @@ class Emploid:
     
     @logger
     def load_identifiers(self):
+        
         import emploid.identifiers as id
 
     @logger
@@ -809,18 +823,17 @@ class Emploid:
     @logger
     def import_image(self, _dir, _method=cv.IMREAD_GRAYSCALE, _internal=True, _report=True):
         if(_internal):
-            path = self.internal_path+_dir
+            path = _dir
             elm = self.cv.imread(path, _method)
             if(elm is not None):
                 if(_report):
                     # print(f"element ({_dir}) IMPROTED successfully")
                     self.element_count += 1
-                    pass
                 return elm
             else:
                 if(_report):
                     print(f"element ({_dir}) FAILED to import")
-                    pass
+                    
         else:
             return Exception("non-internal paths are not currently suppoorted")
 
@@ -882,8 +895,10 @@ class Emploid:
         #This function needs modification, it doesn't raise an exception when the element is not found where it should. Will look into it later.
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             import pyscreeze
-            is_element = isinstance(_ent, pyscreeze.Box)
-            return  _ent if is_element else None
+            is_element = isinstance(_ent, self.np.ndarray)
+            if(not is_element):
+                print(f"entity {_ent} is not an element of type {self.np.ndarray}")
+            return  self.pa.locateOnScreen(_ent) if is_element else None
         
         if(self.driver_type==SETTINGS_USE_SELENIUM):
             from selenium.webdriver.remote.webelement import WebElement
