@@ -10,6 +10,8 @@
 - **Android Automation**: Control Android devices for app testing, UI interaction, and task automation.
 - **Windows Automation**: Manage desktop applications, simulate keyboard/mouse input, and automate system processes.
 
+---
+
 ## Installation
 
 Install Emploid via pip:
@@ -41,9 +43,6 @@ emp.pause() #pause so that the browser window does not terminate
 ## Android Automation
 **Example code:**
 ```bash
-from emploid.emploid import Emploid
-from emploid.constants import *
-
 emp = Emploid(_driver_type=SETTINGS_USE_APPIUM)
 emp.appium_connect()
 
