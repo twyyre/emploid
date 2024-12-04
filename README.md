@@ -1,6 +1,6 @@
 # Emploid
 
-**Emploid** is a Python package designed to simplify the automation of web, Android, and Windows processes. With a focus on ease of use and flexibility, Emploid is the perfect tool for developers looking to streamline repetitive tasks.
+**Emploid** is a Python package designed to simplify the automation of web, Android, and Windows processes. With a focus on ease of use and flexibility, Emploid is the perfect tool for anyone looking to streamline repetitive tasks.
 
 ---
 
