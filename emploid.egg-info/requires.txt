@@ -1,0 +1,6 @@
+wheel
+bar
+greek
+cv2
+numpy
+pyautogui

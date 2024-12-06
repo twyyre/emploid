@@ -1,0 +1,16 @@
+LICENSE
+README.md
+setup.py
+emploid/beholder.py
+emploid/constants.py
+emploid/emploid.py
+emploid/portman.py
+emploid/record.py
+emploid/scribe.py
+emploid/taskman.py
+emploid/testman.py
+emploid.egg-info/PKG-INFO
+emploid.egg-info/SOURCES.txt
+emploid.egg-info/dependency_links.txt
+emploid.egg-info/requires.txt
+emploid.egg-info/top_level.txt

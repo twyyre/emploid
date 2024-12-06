@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: emploid
+Version: 0.4.1
+Summary: A simple to use automation tool for automating web, android and windows proccesses.
+Author: PixQuilly
+Author-email: pixquilly@gmail.com
+License-File: LICENSE
+Requires-Dist: wheel
+Requires-Dist: bar
+Requires-Dist: greek
+Requires-Dist: cv2
+Requires-Dist: numpy
+Requires-Dist: pyautogui
+
+A simple to use automation tool for automating web, android and windows proccesses.

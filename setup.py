@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
    name='emploid',
-   version='0.3.9',
+   version='0.4.1',
    description='A simple to use automation tool for automating web, android and windows proccesses.',
    long_description='A simple to use automation tool for automating web, android and windows proccesses.',
    author='PixQuilly',
