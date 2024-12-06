@@ -1,4 +1,4 @@
-from modules.beholder.beholder import Beholder
+from beholder import Beholder
 
 print("BEHOLDER")
 print("--------------------------------")

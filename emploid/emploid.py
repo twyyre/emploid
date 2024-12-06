@@ -49,8 +49,8 @@ from selenium.webdriver.support.ui import Select #used to deal with select HTML 
 #my modules
 from emploid.constants import *
 import emploid.tools as tls
-from emploid.modules.scribe.scribe import Scribe
-from emploid.modules.taskman.taskman import Taskman
+# from emploid.modules.scribe.scribe import Scribe
+from taskman import Taskman
 
 #sql server database connection module
 import pyodbc
@@ -994,7 +994,7 @@ class Emploid:
         status, elm = self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
         if(_scribble):
             self.row_index += 1
-        self.scribe.insert_row(self.row_index, _action_name=_tooltip, _expected_result=_tooltip, _actual_result=status, _result_state=status, _scribble=_scribble)
+        # self.scribe.insert_row(self.row_index, _action_name=_tooltip, _expected_result=_tooltip, _actual_result=status, _result_state=status, _scribble=_scribble)
         return status, elm
     
     @logger
@@ -1010,7 +1010,7 @@ class Emploid:
         status, elm = self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
         if(_scribble):
             self.row_index += 1
-        self.scribe.insert_row(self.row_index, _action_name=_tooltip, _expected_result=_tooltip, _actual_result=status, _result_state=status, _scribble=_scribble)
+        # self.scribe.insert_row(self.row_index, _action_name=_tooltip, _expected_result=_tooltip, _actual_result=status, _result_state=status, _scribble=_scribble)
         return status, elm
     
     @logger
@@ -1118,7 +1118,7 @@ class Emploid:
         status, result = self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
         if(_scribble):
             self.row_index += 1
-        self.scribe.insert_row(self.row_index, _action_name=_tooltip, _expected_result=_tooltip, _actual_result=status, _result_state=status, _scribble=_scribble)
+        # self.scribe.insert_row(self.row_index, _action_name=_tooltip, _expected_result=_tooltip, _actual_result=status, _result_state=status, _scribble=_scribble)
             
 
         # print("status:", status)
@@ -1131,7 +1131,7 @@ class Emploid:
         self.enter()
         if(_scribble):
             self.row_index += 1
-        self.scribe.insert_row(self.row_index, _action_name=_tooltip, _fourth_column="asdasdasda", _expected_result=_tooltip, _actual_result=check, _result_state=check, _scribble=_scribble)
+        # self.scribe.insert_row(self.row_index, _action_name=_tooltip, _fourth_column="asdasdasda", _expected_result=_tooltip, _actual_result=check, _result_state=check, _scribble=_scribble)
         return check
 
     @logger
@@ -1176,7 +1176,8 @@ class Emploid:
     @logger
     def report_action(self, _row_number, _action_name, _expected_result, _actual_result, _result_state, _scribble: bool = False):
         #What even is this function for? What was I thinking when creating it? We'll never know.
-        self.scribe.insert_row(_row_number, _action_name, _expected_result, _actual_result, _result_state, _scribble=_scribble)
+        # self.scribe.insert_row(_row_number, _action_name, _expected_result, _actual_result, _result_state, _scribble=_scribble)
+        pass
 
     @logger
     def display_elements(self):
@@ -1507,7 +1508,7 @@ class Emploid:
                     col = "btn-success"
                 else:
                     col = "btn-danger"
-                self.scribe.insert_row(0, _tooltip, "True", result, col, _scribble=_scribble)
+                # self.scribe.insert_row(0, _tooltip, "True", result, col, _scribble=_scribble)
 
                 trigger = True
                 state = True
@@ -1528,7 +1529,8 @@ class Emploid:
         if(_exit):
             exit()
         else:
-            self.scribe.insert_row(0, _tooltip, "True", state, "btn-danger")
+            # self.scribe.insert_row(0, _tooltip, "True", state, "btn-danger")
+            pass
         return state
     
     @logger
