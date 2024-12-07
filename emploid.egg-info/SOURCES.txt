@@ -9,6 +9,7 @@ emploid/record.py
 emploid/scribe.py
 emploid/taskman.py
 emploid/testman.py
+emploid/tools.py
 emploid.egg-info/PKG-INFO
 emploid.egg-info/SOURCES.txt
 emploid.egg-info/dependency_links.txt
