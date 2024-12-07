@@ -1,6 +1,7 @@
-wheel
-bar
-greek
-cv2
 numpy
-pyautogui
+opencv-python
+requests
+Appium-Python-Client
+mysql-connector-python
+PyAutoGUI
+selenium
