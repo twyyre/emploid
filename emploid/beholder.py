@@ -25,7 +25,7 @@ class Beholder:
         codec = cv.VideoWriter_fourcc(*"XVID")
 
         # Specify name of Output file
-        from tools import get_time
+        from emploid.tools import get_time
         filename = f"recordings/{get_time()}.avi"
 
         # Specify frames rate. We can choose any

@@ -30,6 +30,10 @@ from emploid.constants import *
 ```
 
 ## Web Automation
+**Prerequistes:**
+* You must download [Chromedriver](https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.87/win64/chromedriver-win64.zip) and place it under a "drivers" folder in your working directory.
+* Make sure the Chromedriver version is the same as your chrome browser version.
+
 **Example code:**
 ```bash
 emp = Emploid(_driver_type=SETTINGS_USE_SELENIUM) #init emploid for web
