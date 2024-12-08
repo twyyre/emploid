@@ -2,16 +2,17 @@
 import json
 import logging
 import os
+from os import getcwd, listdir, isfile, join
 import platform
 from random import randint
 import re
 import sys
-from os import getcwd, listdir
 from time import sleep
 import time
 import string
 import subprocess as sp
 import datetime
+import inspect
 
 #
 import cv2 as cv
@@ -101,11 +102,12 @@ class Emploid:
                 except Exception as e:
                     print("error when creating log:", e)
                 
-                try:
-                    query = f"""INSERT INTO logs (actionname, userid, message, fullerror, request, response, params, kwargs) VALUES ('{_func.__name__}', 'NULL', '{log_message}', 'NULL', 'NULL', 'NULL', '{args_message}', '{kwargs_message}');"""
-                    emp.query(_query=query)
-                except Exception as e:
-                    print("could not save log to DB:", e)
+                if(LOG_TO_DB):
+                    try:
+                        query = f"""INSERT INTO logs (actionname, userid, message, fullerror, request, response, params, kwargs) VALUES ('{_func.__name__}', 'NULL', '{log_message}', 'NULL', 'NULL', 'NULL', '{args_message}', '{kwargs_message}');"""
+                        emp.query(_query=query)
+                    except Exception as e:
+                        print("could not save log to DB:", e)
                     
                 return _func(*args, **kwargs)
             
@@ -146,8 +148,8 @@ class Emploid:
         self.file_path = os.path.dirname(os.path.abspath(__file__))
 
         self.create_environment_directory = False
-        self.create_logs_directory = True
-        self.create_reports_directory = True
+        self.create_logs_directory = False
+        self.create_reports_directory = False
         self.load_entities = False
         self.log_to_db = _log_to_db
         self.logging = False
@@ -173,35 +175,35 @@ class Emploid:
 
 
         # #CREATE LOG FILE-------------------------------------------
-        # if(self.create_logs_directory):
-        #     year = datetime.datetime.now().year
-        #     month = datetime.datetime.now().month
-        #     day = datetime.datetime.now().day
-        #     hour = datetime.datetime.now().hour
-        #     minute = datetime.datetime.now().minute
-        #     second = datetime.datetime.now().second
-        #     log_filename = f"{self.log_path}/internal_log {year}-{month}-{day}-{hour}-{minute}-{second}.log"
+        if(self.create_logs_directory):
+            year = datetime.datetime.now().year
+            month = datetime.datetime.now().month
+            day = datetime.datetime.now().day
+            hour = datetime.datetime.now().hour
+            minute = datetime.datetime.now().minute
+            second = datetime.datetime.now().second
+            log_filename = f"{self.log_path}/internal_log {year}-{month}-{day}-{hour}-{minute}-{second}.log"
 
-        #     tls.f_write(_filename=log_filename, _content="")
+            tls.f_write(_filename=log_filename, _content="")
             
-        #     logger.basicConfig(filename=log_filename, encoding='utf-8', format='%(asctime)s %(message)s', level=logger.INFO)
+            logger.basicConfig(filename=log_filename, encoding='utf-8', format='%(asctime)s %(message)s', level=logger.INFO)
         # #----------------------------------------------------------
 
 
         #CREATE ENVIRONMENT DIRECTORY------------------------------
-        if(self.create_environment_directory):
-            self.environment_path = "environment"
-            self.constants_path = f"{self.environment_path}/constants.py"
+        # if(self.create_environment_directory):
+        #     self.environment_path = "environment"
+        #     self.constants_path = f"{self.environment_path}/constants.py"
 
-            if not os.path.exists(self.environment_path):
-                os.makedirs(self.environment_path)
+        #     if not os.path.exists(self.environment_path):
+        #         os.makedirs(self.environment_path)
         #----------------------------------------------------------
         
 
         #CREATE CONSTANTS.PY---------------------------------------
-        if(self.create_environment_directory):
-            if(not os.path.exists(self.constants_path)):
-                tls.f_write(_filename=self.constants_path, _content="#here lies the constants")
+        # if(self.create_environment_directory):
+        #     if(not os.path.exists(self.constants_path)):
+        #         tls.f_write(_filename=self.constants_path, _content="#here lies the constants")
 
         self.driver_type = _driver_type if _driver_type is not None else SETTINGS_USE_PYAUTOGUI
         #----------------------------------------------------------
@@ -290,7 +292,7 @@ class Emploid:
             
         #LOAD ENTITIES---------------------------------------------
         if(self.load_entities):
-            load_entities_function = self.load_elements if self.driver_type==SETTINGS_USE_PYAUTOGUI else self.load_identifiers
+            load_entities_function = self.load_elements if self.driver_type==SETTINGS_USE_PYAUTOGUI else self.driver_type=None #self.load_identifiers
             load_entities_function()
             
         #----------------------------------------------------------
@@ -416,20 +418,20 @@ class Emploid:
             if(self.browser_type==BROWSER_TYPE_CHROME):
 
                 #automatically update chromedriver
-                self.show("Checking for Chromedriver updates...")
+                # self.show("Checking for Chromedriver updates...")
 
-                try:
-                    import chromedriver_autoinstaller
-                    chromedriver_autoinstaller.install()
-                except Exception as e:
-                    print("could not check for chromedriver updates.")
+                # try:
+                #     import chromedriver_autoinstaller
+                #     chromedriver_autoinstaller.install()
+                # except Exception as e:
+                #     print("could not check for chromedriver updates.")
                 
                 if platform.system()=="Windows":
                     
                     from subprocess import CREATE_NO_WINDOW
-                    self.driver_path = "drivers/chromedriver.exe"
-                    self.show("chromedriver path:", self.file_path)
-                    self.service = Service(executable_path=self.driver_path)#self.file_path+'..\s_py.exe') 
+                    # self.driver_path = "drivers/chromedriver.exe"
+                    # self.show("chromedriver path:", self.driver_path )
+                    self.service = Service()#executable_path=self.driver_path)#self.file_path+'..\s_py.exe') 
                     self.service.creationflags = CREATE_NO_WINDOW
 
                 #chrome options set up  --------------------------------------------------------------------------
@@ -439,12 +441,15 @@ class Emploid:
                 #run in incognito browser window---------------------------
                 if(self.incognito):
                     self.chrome_options.add_argument("--incognito")
+                    self.show("incognito mode activated")
                 #----------------------------------------------------------
 
 
                 #whether to run in headless mode or with visible browser window
                 if(self.headless):
                     self.chrome_options.add_argument("--headless")
+                    self.show("incognito mode activated")
+
                 #----------------------------------------------------------
                 
 
@@ -459,7 +464,7 @@ class Emploid:
                 # self.chrome_options.add_argument("--disable-plugins")
                 # self.chrome_options.add_argument("--disable-infobars")
                 self.chrome_options.add_argument("--extensions_install_verfication=false")
-                self.chrome_options.add_argument("--disable_extensions=true")
+                # self.chrome_options.add_argument("--disable_extensions=true")
                 #-----------------------------------------------------------------------------------------------
 
 
@@ -485,22 +490,15 @@ class Emploid:
                     
                 if(self.vpn):
 
-                    # raise Exception("VPN is not supported at the moment.")
-                
                     try:
-                        self.show("LOAD VPN EXTENSIONS")
                         extension_name = "freevpnExtension"
                         self.chrome_options.add_extension(f"extensions/{extension_name}.crx")
-                        
-                        self.show("FREE VPN EXTENSION LOADED")
                         self.vpn_loaded = True
+                        self.show("freevpnExtension loaded")
                         
                     except Exception as e:
                         self.vpn_loaded = False
                         print(e)
-                else:
-                    print("self.vpn = False")
-                    # pause()
 
                 #----------------------------------------------------------
                 if platform.system() == "Linux":
@@ -512,8 +510,8 @@ class Emploid:
                     
                 if platform.system() == "Windows":
 
-                    print("\n set to windows driver.")
-                    return SeleniumDriver.Chrome(options= self.chrome_options, service= self.service)
+                    self.show("set to windows driver.")
+                    return SeleniumDriver.Chrome(options=self.chrome_options, service=self.service)
                 #----------------------------------------------------------
 
             elif(self.browser_type==BROWSER_TYPE_TOR):
@@ -591,71 +589,8 @@ class Emploid:
 
         except selenium.common.exceptions.SessionNotCreatedException as e:
 
-            self.show("DRIVER ERROR")
-            print(e)
-            
-            # import bs4
-            # from lxml import etree
-            # from io import StringIO 
-
-            # show("chromedriver is not compatible with the version of chrome. downloading suitable version...")
-            
-            # e = str(e)
-            
-            # substr = 'Current browser version is '
-            # substr_length = len(substr)
-            # substr_pos = e.find(substr)
-
-            
-            # version = e[substr_pos+substr_length:substr_pos+substr_length+4]
-
-            # print(f"browser version:[{version}]")
-                        
-            
-            # # browser_version = self.driver.capabilities['version']
-            # # print("browser version:", browser_version)
-            
-            # link = "https://chromedriver.chromium.org/downloads"
-            # result = requests.get(link).content.decode('utf-8')
-
-            # f_write("result.html", result)
-
-            # lxml_tree = etree.parse(StringIO(f_read("result.html")))
-            # show(lxml_tree.xpath("//a"))
-            
-            # soup = bs4.BeautifulSoup(lxml_tree)
-            # print(soup.title.string)
-
-            # input()
-
-            # result = str(result)
-
-            # if version in result:
-            #     target = f"https://chromedriver.storage.googleapis.com/index.html?path={version}"
-            #     result = requests.get(target).content.decode('utf-8')
-            #     result = str(result)
-
-            #     if(version in result):
-            #         substr = """<a href="?path="""
-            #         substr_pos = result.find(substr)
-            #         substr_length = len(substr)
-
-
-            #         result = requests.get(target).content.decode('utf-8')
-            #         result = str(result)
-
-            # else:
-            # print("suitable version could not be downloaded for some reason")
-            #     input()
-
-            # input()
-            
-
-        # self.actions = ActionChains(self.driver)
-        # print(self.driver)
-
-        # self.update_profile_name()
-
+            self.show("Driver error")
+            self.show(e)
 
         return self.driver
     
@@ -672,24 +607,25 @@ class Emploid:
         else:
             raise Exception("please provide a URL.")
 
-    @logger
-    def resolve_imports(self):
+    # @logger
+    # def resolve_imports(self):
 
-        if(self.driver_type==SETTINGS_USE_APPIUM):
-            from appium import webdriver as AppiumDriver
-            from appium.webdriver.common.appiumby import AppiumBy as By
-            from appium.options.android import UiAutomator2Options # Import Appium UiAutomator2 driver for Android platforms (AppiumOptions)
-            from appium.options.common import AppiumOptions
-            from appium.webdriver.common.touch_action import TouchAction as AppiumAction
-            from appium.webdriver.extensions.android.nativekey import AndroidKey as ak
+    #     if(self.driver_type==SETTINGS_USE_APPIUM):
+    #         from appium import webdriver as AppiumDriver
+    #         from appium.webdriver.common.appiumby import AppiumBy as By
+    #         from appium.options.android import UiAutomator2Options # Import Appium UiAutomator2 driver for Android platforms (AppiumOptions)
+    #         from appium.options.common import AppiumOptions
+    #         # from appium.webdriver.common.touch_action import TouchAction as AppiumAction <-- this is deprecated
+    #         from appium.webdriver.extensions.android.nativekey import AndroidKey as ak
         
-        if(self.driver_type==SETTINGS_USE_SELENIUM):
-            from selenium import webdriver
-            from selenium.webdriver.common.by import By
-            from selenium.webdriver.common.keys import Keys
+    #     if(self.driver_type==SETTINGS_USE_SELENIUM):
+    #         from selenium import webdriver
+    #         from selenium.webdriver.common.by import By
+            # from selenium.webdriver.common.keys import Keys
 
     @logger
     def show(self, *_args) -> None:
+        print("\n------------------------")
         for arg in _args:
             print("----", arg)
         print("\n------------------------")
@@ -705,13 +641,8 @@ class Emploid:
                 if(len(directories)):
                     for current_dir in directories:
                         try:
-                            print("current_dir[0]", current_dir[0])
-                            print("current_dir[1]", current_dir[1])
-                            print("current_dir[2]", current_dir[2])
                             extension_index = -4
                             for png in current_dir[2]:
-                                print("picture:", png)
-                                print("extension of file:", png[extension_index:])
                                 if(png[extension_index:].lower()==".png"):
                                     line = "element_"+png[:extension_index]+"=emp.import_image(\""+current_dir[0].replace("\\", "/")+"/"+png+"\", cv.IMREAD_GRAYSCALE)\n"
                                     line = line.replace(_dir, "")
@@ -723,27 +654,24 @@ class Emploid:
                                 print(f"""failed to load [element_{png[:-4]}] from {current_dir[0]}""")
                         except Exception as e:
                             print("error:", e)
-                                
                     
-            content = tls.f_read("load_elements.py")
-
-            tls.f_write("load_elements.py", content)
+            # content = tls.f_read("load_elements.py")
+            # tls.f_write("load_elements.py", content)
         else:
             raise Exception("driver type not supported")
     
-    @logger
-    def load_identifiers(self):
-        
-        import emploid.identifiers as id
+    # @logger
+    # def load_identifiers(self):
+    #     import emploid.identifiers as id
 
-    @logger
-    def get_steps(self) -> list[str]:
-        """SETTINGS_USE_PYAUTOGUI-specific function. It loads screenshots as steps from the internal path."""
-        self.steps = listdir(self.internal_path)
-        # for dir in self.steps:
-        #     self.steps[0].append(dir)
-        #     print("dir:"+self.steps[0][0])
-        print(f"got ({len(self.steps)}) steps")
+    # @logger
+    # def get_steps(self) -> list[str]:
+    #     """SETTINGS_USE_PYAUTOGUI-specific function. It loads screenshots as steps from the internal path."""
+    #     self.steps = listdir(self.internal_path)
+    #     # for dir in self.steps:
+    #     #     self.steps[0].append(dir)
+    #     #     print("dir:"+self.steps[0][0])
+    #     print(f"got ({len(self.steps)}) steps")
         
     @logger
     def image_compare(self, _img1, _img2) -> float:
@@ -839,9 +767,6 @@ class Emploid:
 
     @logger
     def import_images(self, _dir, _internal=True):
-        from os import listdir
-        from os.path import isfile, join
-
         elements = []
         if(_internal):
             _dir = self.internal_path+_dir
@@ -880,10 +805,6 @@ class Emploid:
         if re.match(r'^[.#]?[-_a-zA-Z0-9]+', _ent):
             return "CSS selector"
         
-        # Check if it's a web element (assuming you have a way to check this, e.g., using Selenium)
-        # This part depends on how you determine whether a string is a web element
-        
-        # If none of the above matches, return unknown
         return None
 
     @logger
@@ -894,7 +815,6 @@ class Emploid:
         """
         #This function needs modification, it doesn't raise an exception when the element is not found where it should. Will look into it later.
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
-            import pyscreeze
             is_element = isinstance(_ent, self.np.ndarray)
             if(not is_element):
                 print(f"entity {_ent} is not an element of type {self.np.ndarray}")
@@ -910,7 +830,6 @@ class Emploid:
 
         if(is_element):
             return _ent
-            
         else:
             def func_(self):
                 print("locating element...")
@@ -937,22 +856,25 @@ class Emploid:
             btns = ['left', 'right', 'middle' ]
             self.pa.click(button=btn)
             btn = btns[_btn]
-        if(self.driver_type==SETTINGS_USE_APPIUM):
-            return AppiumAction.press(_btn).perform()
-            
-        if(self.driver_type==SETTINGS_USE_SELENIUM):
+        elif(self.driver_type==SETTINGS_USE_APPIUM):
+            # return AppiumAction.press(_btn).perform()
+            raise Exception("not yet supported")
+        elif(self.driver_type==SETTINGS_USE_SELENIUM):
             raise Exception("not yet supported")
     
     @logger
     def swipe_up(self, _distance=500):
-        # Define the start and end coordinates for the swipe action
-        start_x = self.screen_get_width()/2  # starting x-coordinate (you may need to adjust this)
-        start_y = self.screen_get_height()/2  # starting y-coordinate
-        end_x = start_x  # ending x-coordinate (same as starting x-coordinate for vertical swipe)
-        end_y = start_y + _distance  # ending y-coordinate (you may need to adjust this)
+        if(self.driver_type==SETTINGS_USE_APPIUM):
+            # Define the start and end coordinates for the swipe action
+            start_x = self.screen_get_width()/2  # starting x-coordinate (you may need to adjust this)
+            start_y = self.screen_get_height()/2  # starting y-coordinate
+            end_x = start_x  # ending x-coordinate (same as starting x-coordinate for vertical swipe)
+            end_y = start_y + _distance  # ending y-coordinate (you may need to adjust this)
 
-        # Perform the swipe action
-        self.driver.swipe(start_x, start_y, end_x, end_y, duration=800)  # you can adjust the duration as needed
+            # Perform the swipe action
+            self.driver.swipe(start_x, start_y, end_x, end_y, duration=800)  # you can adjust the duration as needed
+            return True
+        return False
         
     @logger
     def test_func(self):
@@ -977,7 +899,7 @@ class Emploid:
         
     @logger
     def click(self, _elm, _tries=3, _delay=1, _confidence=0.8, _exit=False, _tooltip="", _scribble=False) -> bool:
-        """clicks an element, promising to find it in the process."""
+        """clicks an element, promising to find it beforehand."""
         def func_(self):
             elm = _elm
             elm = self.promise_element(_elm, _confidence=_confidence, _tooltip=_tooltip)
@@ -1015,6 +937,7 @@ class Emploid:
     
     @logger
     def set_value(self, _elm=None, _value=None):
+        """sets the value attribute of an html element using javascript"""
         return self.execute_javascript("arguments[0].value = arguments[1];", _elm, _value)
 
     @logger
@@ -1072,7 +995,6 @@ class Emploid:
         #_level 1 (default) will return name of function that called this function
         #etc
         
-        import inspect
         # return inspect.stack()[1].code_context[0]
         return str(inspect.stack()[_level][3])
 
@@ -1431,41 +1353,41 @@ class Emploid:
         return result.json()
 
     @logger
-    def email_generate(self):
+    # def email_generate(self):
         
-        self.show("getting email...")
-        while True:
-            try:
-                from pymailtm import MailTm, Account, Message
-                return MailTm().get_account()
-            except:
-                pass
+    #     self.show("getting email...")
+    #     while True:
+    #         try:
+    #             from pymailtm import MailTm, Account, Message
+    #             return MailTm().get_account()
+    #         except:
+    #             pass
 
-    @logger
-    def email_listen(self, _email) -> str:
-        try:
-            mails = []
-            while (not len(mails)): #this needs modification
-                mails = _email.get_messages()
-                sleep(2)
-            return mails
-        except Exception as e:
-            print(e)
-            pass
+    # @logger
+    # def email_listen(self, _email) -> str:
+    #     try:
+    #         mails = []
+    #         while (not len(mails)): #this needs modification
+    #             mails = _email.get_messages()
+    #             sleep(2)
+    #         return mails
+    #     except Exception as e:
+    #         print(e)
+    #         pass
 
-    @logger
-    def email_find_code(self, n, s) -> str:
-        import re
-        result = re.search('\\d{%s}'%n, s)
-        return result.group(0) if result else result
+    # @logger
+    # def email_find_code(self, n, s) -> str:
+    #     import re
+    #     result = re.search('\\d{%s}'%n, s)
+    #     return result.group(0) if result else result
 
-    @logger
-    def send_get(self, _url, _params=None, _json=True):
-        return self.testman.get(_url, _params=_params, _json=_json)
+    # @logger
+    # def send_get(self, _url, _params=None, _json=True):
+    #     return self.testman.get(_url, _params=_params, _json=_json)
     
-    @logger
-    def send_post(self, _url, _params, _json=True):
-        return self.testman.post(_url=_url, _params=_params, _json=_json)
+    # @logger
+    # def send_post(self, _url, _params, _json=True):
+    #     return self.testman.post(_url=_url, _params=_params, _json=_json)
     
     @logger
     def clipboard_copy(self):
@@ -1504,10 +1426,10 @@ class Emploid:
             try:
                 result = _func(self, *_args)
                 #insert Scribe row
-                if(result):
-                    col = "btn-success"
-                else:
-                    col = "btn-danger"
+                # if(result):
+                #     col = "btn-success"
+                # else:
+                #     col = "btn-danger"
                 # self.scribe.insert_row(0, _tooltip, "True", result, col, _scribble=_scribble)
 
                 trigger = True
@@ -1567,29 +1489,29 @@ class Emploid:
     def point_in_screen(self, _x, _y):
         return self.pa.onScreen(_x, _y)
 
-    @logger
-    def random_string(self, _length):
-        pass
+    # @logger
+    # def random_string(self, _length):
+    #     pass
 
-    @logger
-    def appium_server_start(self):
-        """Starts Appium Server\n"""
-        print("starting appium server...")
-        info = sp.STARTUPINFO()
-        info.dwFlags = sp.STARTF_USESHOWWINDOW
-        info.wShowWindow = 1
-        self.appium_server = sp.Popen([sys.executable, APPIUM_SERVER_EXE], shell=True, startupinfo=info, creationflags=sp.CREATE_NEW_CONSOLE)
-        return self.appium_server
+    # @logger
+    # def appium_server_start(self):
+    #     """Starts Appium Server\n"""
+    #     print("starting appium server...")
+    #     info = sp.STARTUPINFO()
+    #     info.dwFlags = sp.STARTF_USESHOWWINDOW
+    #     info.wShowWindow = 1
+    #     self.appium_server = sp.Popen([sys.executable, APPIUM_SERVER_EXE], shell=True, startupinfo=info, creationflags=sp.CREATE_NEW_CONSOLE)
+    #     return self.appium_server
     
-    @logger
-    def appium_emulator_start(self):
-        """
-        Starts the android emulator at the path: APPIUM_COMMAND_EMULATOR_START.\n
-        You should probably start your emulator individually.
-        """
-        print("starting emulator...")
-        self.emu = sp.Popen(APPIUM_COMMAND_EMULATOR_START, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
-        return self.emu
+    # @logger
+    # def appium_emulator_start(self):
+    #     """
+    #     Starts the android emulator at the path: APPIUM_COMMAND_EMULATOR_START.\n
+    #     You should probably start your emulator individually.
+    #     """
+    #     print("starting emulator...")
+    #     self.emu = sp.Popen(APPIUM_COMMAND_EMULATOR_START, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+    #     return self.emu
     
     @logger
     def appium_connect(self, _adb_connect=False):
@@ -1598,15 +1520,7 @@ class Emploid:
             with open("config/emu_config.json", 'r') as emu_config:
                 capabilities = json.load(emu_config)
         except:
-            capabilities = json.loads("""{
-                "platformName": "Android",
-                "automationName": "uiautomator2",
-                "deviceName": "Samsung S9",
-                "appPackage": "",
-                "appActivity": "",
-                "language": "en",
-                "locale": "US"
-                }""")
+            capabilities = json.loads('{"platformName": "Android", "automationName": "uiautomator2"}')
         while True:
             try:
                 print("connecting to appium server...")
@@ -1618,25 +1532,25 @@ class Emploid:
             except:
                 pass
 
-    @logger
-    def appium_server_stop(self):
-        """this currently does not work for some reason"""
-        if(self.appium_server):
-            self.appium_server.kill()
-            os.system(f"taskkill /F /IM node.exe")
+    # @logger
+    # def appium_server_stop(self):
+    #     """this currently does not work for some reason"""
+    #     if(self.appium_server):
+    #         self.appium_server.kill()
+    #         os.system(f"taskkill /F /IM node.exe")
 
     @logger
     def appium_emulator_stop(self):
         if(self.emu):
             self.emu.kill()
 
-    @logger
-    def move_to(self, _element):
-        return AppiumAction.move_to(_element).perform()
+    # @logger
+    # def move_to(self, _element):
+    #     return AppiumAction.move_to(_element).perform()
     
-    @logger
-    def mouse_release(self):
-        AppiumAction.release().perform()
+    # @logger
+    # def mouse_release(self):
+    #     AppiumAction.release().perform()
         
     @logger
     def activate_app(self, _app):
@@ -1645,7 +1559,7 @@ class Emploid:
     
     @logger
     def close_app(self, _app):
-        """deactivates an app that is installed on the emulator device."""
+        """closes an app that is installed on the emulator device."""
         return self.driver.terminate_app(_app)
 
     @logger
@@ -1734,13 +1648,8 @@ class Emploid:
         
     @logger
     def get_methods(self):
-        # Get a list of all attributes (including methods) of the class
         methods = [method for method in dir(Emploid) if callable(getattr(Emploid, method))]
-
-        # Filter out built-in methods and attributes
         methods = [method for method in methods if not method.startswith("__")]
-
-        # Print the list of methods
         return methods
     
     @logger
@@ -1752,16 +1661,12 @@ class Emploid:
     def test_chance(self, _probability): #tests the chance of execution for actions
 
         _probability = int(_probability)
-        
         if(_probability>100):
             _probability = 100
-
         i = randint(0, 100)
-
         if(i<=_probability):
             return True
-        else:
-            return False
+        return False
 
     @logger
     def add_action(self, _action=None, _value=None, _target=None, _chance=100, _priority=0): #adds an action to the LOCAL ACTIONS list (self.actions). This is used on imported actions from actions.json and not on CLOUD ACTIONS (which are passed to run_action() directly and are executed immediately)
@@ -1833,8 +1738,6 @@ class Emploid:
         #     self.add_action(_action=CONST.ACT_POST_TO_RANDOM_GROUP, _value=page, _target="", _chance=80, _priority=0)
         #     # self.add_action(_action=CONST.ACT_ADD_SUGGESTED_FRIEND, _value="", _target="", _chance=80, _priority=0)
         #     self.add_action(_action=CONST.ACT_POST_QUOTE_IN_RANDOM_GROUP, _value="", _target="", _chance=80, _priority=0)
-
-
 
         show(f"{len(self.actions)} vip actions generated")
 
@@ -1933,28 +1836,16 @@ class Emploid:
                         self.driver.get(self.driver.vpn_url)
                         # pause()
                     self.promise(_func=func_, _tooltip=f"getting link ({self.driver.vpn_url})", _tries=100, _delay=3)
-
                     
-
-                    if(True):
-                        if(
-                            "blocked" in self.driver.page_source.lower()
-                            or "Thank You For Installing VeePN".lower() in self.driver.page_source.lower()
-                            ):
-                            raise Exception ("Extension has been blocked by Chrome")
-                        
-
-                    # except Exception as e:
-                    #     print("could not open vpn again")
-                    #     print(e)
+                    if(
+                        "blocked" in self.driver.page_source.lower()
+                        or "Thank You For Installing VeePN".lower() in self.driver.page_source.lower()
+                        ):
+                        raise Exception ("Extension has been blocked by Chrome")
                 self.promise(_func=func_, _tooltip="getting extension id", _tries=100, _delay=3)
-                # pause()
-
 
             if(self.browser_type==BROWSER_TYPE_CHROME):
                 def func_(self):
-                # try:
-                    
                     self.driver.vpn_url = None
                     
                     if(self.vpn_index==0):
@@ -1974,11 +1865,6 @@ class Emploid:
                                 or "Thank You For Installing VeePN".lower() in self.driver.page_source.lower()
                                 ):
                                 raise Exception ("Extension has been blocked by Chrome")
-                        
-
-                        # except Exception as e:
-                        #     print("could not open vpn again")
-                        #     print(e)
                 self.promise(_func=func_, _tooltip="getting link", _tries=100, _delay=3)
             
             if(self.vpn_index==0):
@@ -2009,35 +1895,18 @@ class Emploid:
                     # print("vpn_tab:", vpn_tab)
 
                     if(self.pressed_activate):
-
-                        # print("open tabs:", len(driver.window_handles))
-                        # input()
-
                         for tab in self.driver.window_handles:
-                            
-                            # print("selecting tab...")
                             self.select_tab(tab)
                             tab_title = self.driver.title
-                            # print("tab title:", tab_title)
-
                             try:
                                 if(tab!=self.vpn_tab):
                                     print(f"{tab_title}!={vpn_tab_title}")
-                                    # act.select_tab(tab)
                                     self.close_tab(tab)
-                                else:
-                                    pass
                             except:
-                                
                                 pass
-                                
-                    
                 except Exception as e:
                     print(e)
-                    pass
             self.promise(_func=func_, _tooltip="c0000", _delay=0)
-
-
 
             while True:
 
@@ -2182,20 +2051,9 @@ class Emploid:
         return self.promise(_func=func_, _args=args, _tooltip="grab file from link")
 
     @logger
-    def test_ip(self): #get the PUBLIC IP of the device through an online service or JSON request
-        #imported from my FBBM module for facebook automation
-        #manual/physical method (open and scrape):
-        # self.get('http://lumtest.com/myip.json')
-        # body = self.driver.find_element(By.TAG_NAME, 'body')
-        # print("\n-----------------------\nby CHROME BROWSER:", body.text, "\n-----------------------\n")
-
-        #JSON download method, this is more effecient:
-        myip = self.grab_file('http://lumtest.com/myip.json', "myip.json")
-
-        file = tls.f_read(myip)
-
-        print("\n-----------------------\nby GET REQUEST:", file, "\n-----------------------\n")
-        return myip
+    def test_ip(self): 
+        """get the PUBLIC IP of the device through an online service or JSON request"""
+        return tls.f_read(self.grab_file('http://lumtest.com/myip.json', "myip.json"))
 
     @logger
     def execute_javascript(self, _script, *_params):
