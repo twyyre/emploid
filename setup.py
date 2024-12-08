@@ -18,7 +18,7 @@ def process_requirements(_fname="requirements.txt"):
 
 setup(
    name='emploid',
-   version='0.4.6',
+   version='0.4.7',
    description='A simple to use automation tool for automating web, android and windows proccesses.',
    long_description='A simple to use automation tool for automating web, android and windows proccesses.',
    author='PixQuilly',

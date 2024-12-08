@@ -79,12 +79,9 @@ emp.pause() #pause so that the browser window does not terminate
 ## Windows Automation
 **Example code:**
 ```python
-emp = Emploid(_driver_type=SETTINGS_USE_PYAUTOGUI) #init emploid for windows
-emp.get("https://google.com") #go to google.com
-emp.click("/html/body/div[2]/div[2]/div[3]/span/div/div/div/div[3]/div[1]/button[2]/div") #click on popup accept button
-emp.submit("hello world", "/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/textarea") #search for the string "hello world"
-emp.pause() #pause so that the browser window does not terminate
+emp = Emploid(_driver_type=SETTINGS_USE_PYAUTOGUI)
 ```
+This section will be documented in the future.
 ---
 
 

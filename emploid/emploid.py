@@ -50,7 +50,7 @@ from selenium.webdriver.support.ui import Select #used to deal with select HTML 
 from emploid.constants import *
 import emploid.tools as tls
 # from emploid.modules.scribe.scribe import Scribe
-from taskman import Taskman
+# from taskman import Taskman
 
 #sql server database connection module
 import pyodbc
@@ -214,7 +214,7 @@ class Emploid:
 
         # self.api = API()
         
-        self.taskman = Taskman()
+        # self.taskman = Taskman()
         
         self.by = SeleniumBy
         self.pa = pa
@@ -227,8 +227,8 @@ class Emploid:
         self.start_time = time.perf_counter()
         self.end_time = None
 
-        self.scribe = Scribe(_report_path=self.report_path)
-        self.scribe.new_page("emploid report")
+        # self.scribe = Scribe(_report_path=self.report_path)
+        # self.scribe.new_page("emploid report")
         self.request_delay = _request_delay
         
         self.internal_path = "elements/"
@@ -667,7 +667,7 @@ class Emploid:
             self.driver.get(_url)
             if(_scribble):
                 self.row_index += 1
-            self.scribe.insert_row(_row_number=self.row_index, _action_name=_tooltip, _expected_result=_tooltip, _actual_result=True, _result_state=True, _scribble=_scribble)
+            # self.scribe.insert_row(_row_number=self.row_index, _action_name=_tooltip, _expected_result=_tooltip, _actual_result=True, _result_state=True, _scribble=_scribble)
             return True
         else:
             raise Exception("please provide a URL.")

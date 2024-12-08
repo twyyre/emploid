@@ -5,3 +5,4 @@ Appium-Python-Client
 mysql-connector-python
 PyAutoGUI
 selenium
+pyodbc
