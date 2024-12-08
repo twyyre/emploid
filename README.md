@@ -61,7 +61,7 @@ appium driver install uiautomator2
 ```javascript
 appium
 ```
-* Use [Appium Inspector](https://github.com/appium/appium-inspector/releases) to grab widget identifiers to be able to interact with the. Such as XPATH.
+* Use [Appium Inspector](https://github.com/appium/appium-inspector/releases) to grab widget identifiers to be able to interact with widgets. Such as XPATH.
 * Now you can run your emploid program.
 
 **Example code:**
