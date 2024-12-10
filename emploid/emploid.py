@@ -2,7 +2,8 @@
 import json
 import logging
 import os
-from os import getcwd, listdir, isfile, join
+from os import getcwd, listdir
+from os.path import isfile, join
 import platform
 from random import randint
 import re
@@ -62,7 +63,7 @@ class Emploid:
 
     #DECORATOR FOR LOGGING FUNCTION CALLS----------------------
     @staticmethod
-    def logger(_func, *args):
+    def loggerd(_func, *args):
         def wrapper(*args, **kwargs):
             try:
                 emp = args[0]
@@ -129,7 +130,7 @@ class Emploid:
     #----------------------------------------------------------
 
     
-    @logger
+    @loggerd
     def __init__(
             self, 
             _driver_type=SETTINGS_USE_SELENIUM,
@@ -292,7 +293,7 @@ class Emploid:
             
         #LOAD ENTITIES---------------------------------------------
         if(self.load_entities):
-            load_entities_function = self.load_elements if self.driver_type==SETTINGS_USE_PYAUTOGUI else self.driver_type=None #self.load_identifiers
+            load_entities_function = self.load_elements if self.driver_type==SETTINGS_USE_PYAUTOGUI else None #self.load_identifiers
             load_entities_function()
             
         #----------------------------------------------------------
@@ -311,7 +312,7 @@ class Emploid:
             
         self.show("started")
 
-    @logger
+    @loggerd
     def __del__(self):
         # self.taskman.kill_task(self.beholder, _delay=2)
         # if(self.driver_type==SETTINGS_USE_APPIUM):
@@ -327,7 +328,7 @@ class Emploid:
 
         self.show(f"test duration: {time_} seconds.")
 
-    @logger
+    @loggerd
     def db_connect(self, _database_server=None, _database_name=None, _database_username=None, _database_password=None):
         # Define the connection parameters
         database_server = DATABASE_SERVER if _database_server is None else _database_server
@@ -380,7 +381,7 @@ class Emploid:
         return (result)
 
     
-    @logger
+    @loggerd
     def quick_query(self, _database_server=None, _database_name=None, _database_username=None, _database_password=None, _query=None):
         """quickly connects to specified server, database and table, and executes a query"""
         conn = self.db_connect(_database_server, _database_name, _database_username, _database_password)
@@ -388,19 +389,19 @@ class Emploid:
         self.db_close(conn)
         return result
     
-    @logger
+    @loggerd
     def db_close(self, _db_con):
         """closes existing connection to database"""
         db_con = self.db_connection if _db_con is None else _db_con
         db_con.close()
         return db_con
     
-    @logger
+    @loggerd
     def return_print(*_strings):
         print(_strings)
         return _strings
 
-    @logger
+    @loggerd
     def set_log_path(self, _path):
         if not os.path.exists(_path):
             os.makedirs(_path)
@@ -408,7 +409,7 @@ class Emploid:
         # logger.basicConfig(filename=self.log_path, encoding='utf-8', format='%(asctime)s %(message)s', level=logger.DEBUG)
         return self.log_path
     
-    @logger
+    @loggerd
     def determine_browser(self):
 
         import selenium.common.exceptions
@@ -595,7 +596,7 @@ class Emploid:
         return self.driver
     
     
-    @logger
+    @loggerd
     def get(self, _url="", _tooltip="get link", _scribble=False):
         """loads a web page in the browser"""
         if(_url):
@@ -607,7 +608,7 @@ class Emploid:
         else:
             raise Exception("please provide a URL.")
 
-    # @logger
+    # @loggerd
     # def resolve_imports(self):
 
     #     if(self.driver_type==SETTINGS_USE_APPIUM):
@@ -623,14 +624,14 @@ class Emploid:
     #         from selenium.webdriver.common.by import By
             # from selenium.webdriver.common.keys import Keys
 
-    @logger
+    @loggerd
     def show(self, *_args) -> None:
         print("\n------------------------")
         for arg in _args:
             print("----", arg)
         print("\n------------------------")
 
-    @logger
+    @loggerd
     def load_elements(self, _dir='elements') -> None:
         elm_dir = getcwd()+_dir
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
@@ -660,11 +661,11 @@ class Emploid:
         else:
             raise Exception("driver type not supported")
     
-    # @logger
+    # @loggerd
     # def load_identifiers(self):
     #     import emploid.identifiers as id
 
-    # @logger
+    # @loggerd
     # def get_steps(self) -> list[str]:
     #     """SETTINGS_USE_PYAUTOGUI-specific function. It loads screenshots as steps from the internal path."""
     #     self.steps = listdir(self.internal_path)
@@ -673,7 +674,7 @@ class Emploid:
     #     #     print("dir:"+self.steps[0][0])
     #     print(f"got ({len(self.steps)}) steps")
         
-    @logger
+    @loggerd
     def image_compare(self, _img1, _img2) -> float:
         """compares two images and returns similarity percentage between them."""
         # load the input images
@@ -691,12 +692,12 @@ class Emploid:
 
         return difference/pixel_num
     
-    @logger
+    @loggerd
     def convert_to_grayscale(self, _img):
         """converts ``_img`` to grayscale."""
         return self.cv.cvtColor(_img, self.cv.COLOR_BGR2GRAY)
     
-    @logger
+    @loggerd
     def detect_template(self, _needle: cv.Mat, _haystack: cv.Mat, _method=cv.TM_CCOEFF_NORMED, _threshold = 0.5):
         template = _needle
         haystack = _haystack
@@ -738,7 +739,7 @@ class Emploid:
             else:
                 raise Exception("Template not found or below accuracy threshold.")
     
-    @logger
+    @loggerd
     def scale_to(self, _img1, _img2):
         #scales image 1 to image 2 size
         image3 = cv.resize(_img1, (_img2.shape[1], _img2.shape[0]), cv.INTER_LINEAR_EXACT)
@@ -748,7 +749,7 @@ class Emploid:
         else:
             return False
 
-    @logger
+    @loggerd
     def import_image(self, _dir, _method=cv.IMREAD_GRAYSCALE, _internal=True, _report=True):
         if(_internal):
             path = _dir
@@ -765,7 +766,7 @@ class Emploid:
         else:
             return Exception("non-internal paths are not currently suppoorted")
 
-    @logger
+    @loggerd
     def import_images(self, _dir, _internal=True):
         elements = []
         if(_internal):
@@ -790,7 +791,7 @@ class Emploid:
 
         return elements
     
-    @logger
+    @loggerd
     def determine_entity(self, _ent):
         """determines whether passed ``_ent`` is a webelement, an xpath, a css selector, or a package name."""
         # Check if it's a package name
@@ -807,7 +808,7 @@ class Emploid:
         
         return None
 
-    @logger
+    @loggerd
     def promise_element(self, _ent, _mode=None, _tries=3, _delay=1, _confidence=0.9, _tooltip=f"promising element..."):
         """
         this function "promises" to return an element if it is possible. Whether you pass it a screenshot, an xpath, or a package Id.\n
@@ -842,14 +843,14 @@ class Emploid:
                     return False
             return self.promise(_func=func_, _tries=_tries, _delay=_delay, _tooltip=_tooltip)
     
-    @logger
+    @loggerd
     def keyboard_paste(self, _str) -> None:
         """copies the specified ``_str`` into the clipboard and pastes it using ``CRTL + V``."""
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             clip.copy(_str)
             self.keyboard_hotkey("ctrl", "v")
 
-    @logger
+    @loggerd
     def press(self, _btn: int =0) -> None:
         
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
@@ -862,7 +863,7 @@ class Emploid:
         elif(self.driver_type==SETTINGS_USE_SELENIUM):
             raise Exception("not yet supported")
     
-    @logger
+    @loggerd
     def swipe_up(self, _distance=500):
         if(self.driver_type==SETTINGS_USE_APPIUM):
             # Define the start and end coordinates for the swipe action
@@ -876,11 +877,11 @@ class Emploid:
             return True
         return False
         
-    @logger
+    @loggerd
     def test_func(self):
         print("this is a test function.")
 
-    @logger
+    @loggerd
     def swipe_down(self, _distance=500):
         # Define the start and end coordinates for the swipe action
         start_x = self.screen_get_width()/2  # starting x-coordinate (you may need to adjust this)
@@ -891,13 +892,13 @@ class Emploid:
         # Perform the swipe action
         self.driver.swipe(start_x, start_y, end_x, end_y, duration=800)  # you can adjust the duration as needed
 
-    @logger
+    @loggerd
     def check_installed(self, _package):
         if(self.driver_type==SETTINGS_USE_APPIUM):
             return self.driver.is_app_installed(_package)
         raise Exception("method not supported for this driver type")
         
-    @logger
+    @loggerd
     def click(self, _elm, _tries=3, _delay=1, _confidence=0.8, _exit=False, _tooltip="", _scribble=False) -> bool:
         """clicks an element, promising to find it beforehand."""
         def func_(self):
@@ -919,7 +920,7 @@ class Emploid:
         # self.scribe.insert_row(self.row_index, _action_name=_tooltip, _expected_result=_tooltip, _actual_result=status, _result_state=status, _scribble=_scribble)
         return status, elm
     
-    @logger
+    @loggerd
     def detect_element(self, _elm, _tries=3, _delay=1, _confidence=0.8, _exit=False, _tooltip="", _scribble=False) -> bool:
         """clicks an element, promising to find it in the process."""
         def func_(self):
@@ -935,12 +936,12 @@ class Emploid:
         # self.scribe.insert_row(self.row_index, _action_name=_tooltip, _expected_result=_tooltip, _actual_result=status, _result_state=status, _scribble=_scribble)
         return status, elm
     
-    @logger
+    @loggerd
     def set_value(self, _elm=None, _value=None):
         """sets the value attribute of an html element using javascript"""
         return self.execute_javascript("arguments[0].value = arguments[1];", _elm, _value)
 
-    @logger
+    @loggerd
     def lclick(self, _elm, _tooltip="Left Click", _tries=3, _delay=1, _exit=False)  -> bool:
         def func_(self):
             elm = _elm
@@ -952,7 +953,7 @@ class Emploid:
                 raise Exception("could not left click element")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    @logger
+    @loggerd
     def rclick(self, _elm, _tooltip="Right Click", _tries=3, _delay=1, _exit=False) -> bool:
         def func_(self):
             elm = _elm
@@ -964,7 +965,7 @@ class Emploid:
                 raise Exception("could not right click element")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    @logger
+    @loggerd
     def dbclick(self, _elm, _tooltip="Double Click", _tries=3, _delay=1, _exit=False) -> bool:
         def func_(self):
             elm = _elm
@@ -976,7 +977,7 @@ class Emploid:
                 raise Exception("could not double click element")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    @logger
+    @loggerd
     def mdclick(self, _elm, _tooltip="Middle Click", _tries=3, _delay=1, _exit=False) -> bool:
         def func_(self):
             elm = _elm
@@ -988,7 +989,7 @@ class Emploid:
                 raise Exception("could not middle click element")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    @logger
+    @loggerd
     def get_func_name(self, _level=1) -> str:
         #level is the scope level of function to get the name of
         #_level 0 will return name of this function
@@ -998,7 +999,7 @@ class Emploid:
         # return inspect.stack()[1].code_context[0]
         return str(inspect.stack()[_level][3])
 
-    @logger
+    @loggerd
     def input_into(self, _str, _elm=None, _confidence=0.77, _tries=3, _delay=1, _exit=False, _action_name="", _tooltip="", _click=True, _scribble=False) -> bool:
         """
         input text into element.
@@ -1046,7 +1047,7 @@ class Emploid:
         # print("status:", status)
         return status, result
 
-    @logger
+    @loggerd
     def submit(self, _str, _elm, _tries=3, _delay=1, _tooltip="submit text to an input field", _scribble=False):
         """simulates inputing text into an input and then pressing enter."""
         check = self.input_into(_str=_str, _elm=_elm, _tries=_tries, _delay=_delay, _tooltip=_tooltip)
@@ -1056,12 +1057,12 @@ class Emploid:
         # self.scribe.insert_row(self.row_index, _action_name=_tooltip, _fourth_column="asdasdasda", _expected_result=_tooltip, _actual_result=check, _result_state=check, _scribble=_scribble)
         return check
 
-    @logger
+    @loggerd
     def tap(self, _x, _y):
         """taps a specific point on screen"""
         return self.driver.tap([(_x, _y)])
     
-    @logger
+    @loggerd
     def keyboard_press(self, _key) -> None:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             self.pa.press(_key)
@@ -1070,7 +1071,7 @@ class Emploid:
         if(self.driver_type==SETTINGS_USE_APPIUM):
             self.driver.press_keycode(_key)
         
-    @logger
+    @loggerd
     def enter(self, _elm=None):
         """simulates pressing the enter key"""
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
@@ -1082,7 +1083,7 @@ class Emploid:
         if(self.driver_type==SETTINGS_USE_SELENIUM):
             ActionChains(self.driver).key_down(Keys.ENTER).perform()
 
-    @logger
+    @loggerd
     def escape(self, _elm=None):
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             raise Exception("not supported yet.")
@@ -1095,13 +1096,13 @@ class Emploid:
         if(self.driver_type==SETTINGS_USE_SELENIUM):
             ActionChains(self.driver).key_down(Keys.ESCAPE).perform()
 
-    @logger
+    @loggerd
     def report_action(self, _row_number, _action_name, _expected_result, _actual_result, _result_state, _scribble: bool = False):
         #What even is this function for? What was I thinking when creating it? We'll never know.
         # self.scribe.insert_row(_row_number, _action_name, _expected_result, _actual_result, _result_state, _scribble=_scribble)
         pass
 
-    @logger
+    @loggerd
     def display_elements(self):
         """displays a list of all elements found on the screen."""
         if(self.driver_type==SETTINGS_USE_APPIUM):
@@ -1109,36 +1110,36 @@ class Emploid:
             for elm in allelms:
                 print(elm.get_attribute('class'), elm.text)
 
-    @logger
+    @loggerd
     def keyboard_hold(self, _key) -> None:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             self.pa.keyDown(_key)
         else:
             raise Exception("not supported for this driver type")
 
-    @logger
+    @loggerd
     def keyboard_release(self, _key) -> None:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             self.pa.keyUp(_key)
         else:
             raise Exception("not supported for this driver type")
     
-    @logger
+    @loggerd
     def keyboard_hotkey(self, *_keys) -> None:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             self.pa.hotkey(*_keys) 
         else:
             raise Exception("not supported for this driver type")
 
-    @logger
+    @loggerd
     def find_element(self, _xpath, _method=SeleniumBy.XPATH):
         return self.driver.find_element(_method, _xpath)
     
-    @logger
+    @loggerd
     def find_elements(self, _xpath, _method=SeleniumBy.XPATH):
         return self.driver.find_elements(_method, _xpath)
     
-    @logger
+    @loggerd
     def locate(self, _elm, _confidence=0.9, _mode=None, _grayscale=True): 
         """locates an element through the provied identifier ``_elm``"""
         mode = _mode
@@ -1170,7 +1171,7 @@ class Emploid:
             if "/" in _elm.lower(): _mode=SeleniumBy.XPATH
             return self.find_element(_elm, _method=_mode)
 
-    @logger
+    @loggerd
     def locate_in_region(self, _elm, _x, _y, _xx, _yy, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True): 
         mode = _mode
         if(mode==DETECTION_MODE_REGULAR):
@@ -1186,7 +1187,7 @@ class Emploid:
             cv.waitKey(0)
             cv.destroyAllWindows()
             
-    @logger
+    @loggerd
     def locate_all(self, _confidence=0.9, _mode=DETECTION_MODE_REGULAR, _grayscale=True):
         """Locates all elements on the current view."""
         mode = _mode
@@ -1202,7 +1203,7 @@ class Emploid:
         if(self.driver_type==SETTINGS_USE_APPIUM):
             return self.find_elements("//*")
 
-    @logger
+    @loggerd
     def contains_arabic_letters(self, input_string):
         #written by chat-gpt
         import re
@@ -1212,14 +1213,14 @@ class Emploid:
         # Check if the input string contains Arabic letters
         return bool(arabic_letters_pattern.search(input_string))
         
-    @logger
+    @loggerd
     def prompt(self, _str) -> None:
         return self.pa.prompt(_str)
     
     def spaghette(self):
         return "Toucha the spaghette"
 
-    @logger
+    @loggerd
     def confirm(self, _str):
         value = self.pa.confirm(_str)
         if(value.lower()=="cancel"):
@@ -1227,11 +1228,11 @@ class Emploid:
         if(value.lower()=="ok"):
             return True
 
-    @logger
+    @loggerd
     def alert(self, _str=""):
         return self.pa.alert(_str, 'EMPLOID ALERT')
         
-    @logger
+    @loggerd
     def moveto(self, _elm, _tooltip="Move Mouse to Element", _tries=3, _delay=1, _exit=False) -> bool:
         def func_(self):
             if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
@@ -1246,24 +1247,24 @@ class Emploid:
                 raise Exception("not supported for this driver type")
         return self.promise(_func=func_, _tooltip=_tooltip, _tries=_tries, _delay=_delay, _exit=_exit)
 
-    @logger
+    @loggerd
     def mouse_scroll(self, _value: float, _x: float=None, _y: float=None) -> None:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             self.pa.scroll(_value, x=_x, y=_y) #positive up, negative down
 
-    @logger
+    @loggerd
     def mouse_scroll_up(self, _value: float=250, _x: float=None, _y: float=None) -> None:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             value = abs(_value)
             self.mouse_scroll(value, _x, _y)
 
-    @logger
+    @loggerd
     def mouse_scroll_down(self, _value: float=-250, _x: float=None, _y: float=None) -> None:
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             value = -abs(_value)
             self.mouse_scroll(value, _x, _y)
 
-    @logger
+    @loggerd
     def get_pixel(self, _elm=None, _px=0, _py=0):
         """gets the color of a pixel at a specific point"""
         #To obtain the RGB color of a pixel in a screenshot, use the Image object’s getpixel() method:
@@ -1273,42 +1274,42 @@ class Emploid:
             else:
                 return self.pa.pixel((_px, _py))
 
-    @logger
+    @loggerd
     def get_screenshot(self, _screen_name : str):
         """captures a screenshot of the screen"""
         return self.pa.screenshot(_screen_name)
 
-    @logger
+    @loggerd
     def get_mouse_pos(self):
         """gets the mouse position on screen"""
         return self.pa.position()
 
-    @logger
+    @loggerd
     def set_delay(self, _value: float) -> None:
         """sets a delay between actions for template-matching driver."""
         self.pa.PAUSE = _value
 
-    @logger
+    @loggerd
     def set_failsafe(self, _value: bool) -> None:
         self.pa.FAILSAFE = _value
 
-    @logger
+    @loggerd
     def mouse_move_relative(self, _xoffset=0, _yoffset=0, _seconds=0) -> None:
         self.pa.moveRel(_xoffset, _yoffset, duration=_seconds)
 
-    @logger
+    @loggerd
     def mouse_move(self, _x, _y, _seconds=0) -> None:
         self.pa.moveTo(_x, _y, duration=_seconds)
 
-    @logger
+    @loggerd
     def mouse_drag_to(self, _x, _y, _seconds) -> None:
         self.pa.dragTo(_x, _y, duration=_seconds)  # drag mouse to XY
 
-    @logger
+    @loggerd
     def mouse_drag_to_relative(self, _xoffset, _yoffset, _seconds) -> None:
         self.pa.dragTo(_xoffset, _yoffset, duration=_seconds) 
 
-    @logger
+    @loggerd
     def program_run(self, _path):
         from pywinauto import Desktop, Application
         prog_path = _path
@@ -1317,7 +1318,7 @@ class Emploid:
         prog = Application().start(prog_path)
         return prog#Application(backend='uia').connect(path=program_name, title_re='New Tab')
     
-    @logger
+    @loggerd
     def chrome_run(self, _url: str="", _incognito=False, _maximized=True) -> None:
         #this function is not used
         if(_incognito):
@@ -1346,13 +1347,13 @@ class Emploid:
             app_new_tab = Application(backend='uia').connect(path='chrome.exe', title_re='New Tab')
             return True
 
-    @logger
+    @loggerd
     def get_otp(self, _sn=797693694):
         
         result = requests.get(f"{TESTAPI_GET_OTP}?sn={_sn}")
         return result.json()
 
-    @logger
+    @loggerd
     # def email_generate(self):
         
     #     self.show("getting email...")
@@ -1363,7 +1364,7 @@ class Emploid:
     #         except:
     #             pass
 
-    # @logger
+    # @loggerd
     # def email_listen(self, _email) -> str:
     #     try:
     #         mails = []
@@ -1375,21 +1376,21 @@ class Emploid:
     #         print(e)
     #         pass
 
-    # @logger
+    # @loggerd
     # def email_find_code(self, n, s) -> str:
     #     import re
     #     result = re.search('\\d{%s}'%n, s)
     #     return result.group(0) if result else result
 
-    # @logger
+    # @loggerd
     # def send_get(self, _url, _params=None, _json=True):
     #     return self.testman.get(_url, _params=_params, _json=_json)
     
-    # @logger
+    # @loggerd
     # def send_post(self, _url, _params, _json=True):
     #     return self.testman.post(_url=_url, _params=_params, _json=_json)
     
-    @logger
+    @loggerd
     def clipboard_copy(self):
         import win32clipboard
         win32clipboard.OpenClipboard()
@@ -1397,7 +1398,7 @@ class Emploid:
         win32clipboard.CloseClipboard()
         return data
     
-    @logger
+    @loggerd
     def detect(self, _elm, _tooltip="detect element"):
         def func_(self, _confidence=0.9):
             print("locating element")
@@ -1410,7 +1411,7 @@ class Emploid:
                 return False
         return self.promise(_func=func_, _tooltip=f"attempt to locate element...")
 
-    @logger
+    @loggerd
     def promise(self, _func, *_args, _tooltip="", _tries=3, _delay=1, _fullerror=False, _noerror=False, _noprint=False, _exit=False, _scribble=False):
         if(_tooltip==""):
             _tooltip = self.get_func_name(_level=2)
@@ -1455,7 +1456,7 @@ class Emploid:
             pass
         return state
     
-    @logger
+    @loggerd
     def screen_get_size(self):
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             return self.pa.size()
@@ -1463,7 +1464,7 @@ class Emploid:
             # Get screen size
             return self.driver.get_window_size()
 
-    @logger
+    @loggerd
     def screen_get_width(self):
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             return self.pa.size()[0]
@@ -1474,7 +1475,7 @@ class Emploid:
             # Extract width and height from the screen size
             return screen_size['width']
 
-    @logger
+    @loggerd
     def screen_get_height(self):
         if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
             return self.pa.size()[1]
@@ -1485,15 +1486,15 @@ class Emploid:
             # Extract width and height from the screen size
             return screen_size['height']
         
-    @logger
+    @loggerd
     def point_in_screen(self, _x, _y):
         return self.pa.onScreen(_x, _y)
 
-    # @logger
+    # @loggerd
     # def random_string(self, _length):
     #     pass
 
-    # @logger
+    # @loggerd
     # def appium_server_start(self):
     #     """Starts Appium Server\n"""
     #     print("starting appium server...")
@@ -1503,7 +1504,7 @@ class Emploid:
     #     self.appium_server = sp.Popen([sys.executable, APPIUM_SERVER_EXE], shell=True, startupinfo=info, creationflags=sp.CREATE_NEW_CONSOLE)
     #     return self.appium_server
     
-    # @logger
+    # @loggerd
     # def appium_emulator_start(self):
     #     """
     #     Starts the android emulator at the path: APPIUM_COMMAND_EMULATOR_START.\n
@@ -1513,7 +1514,7 @@ class Emploid:
     #     self.emu = sp.Popen(APPIUM_COMMAND_EMULATOR_START, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     #     return self.emu
     
-    @logger
+    @loggerd
     def appium_connect(self, _adb_connect=False):
         """Connects to appium server, and subsequently, the emulator."""
         try:
@@ -1532,37 +1533,37 @@ class Emploid:
             except:
                 pass
 
-    # @logger
+    # @loggerd
     # def appium_server_stop(self):
     #     """this currently does not work for some reason"""
     #     if(self.appium_server):
     #         self.appium_server.kill()
     #         os.system(f"taskkill /F /IM node.exe")
 
-    @logger
+    @loggerd
     def appium_emulator_stop(self):
         if(self.emu):
             self.emu.kill()
 
-    # @logger
+    # @loggerd
     # def move_to(self, _element):
     #     return AppiumAction.move_to(_element).perform()
     
-    # @logger
+    # @loggerd
     # def mouse_release(self):
     #     AppiumAction.release().perform()
         
-    @logger
+    @loggerd
     def activate_app(self, _app):
         """activates an app that is installed on the emulator device."""
         return self.driver.activate_app(_app)
     
-    @logger
+    @loggerd
     def close_app(self, _app):
         """closes an app that is installed on the emulator device."""
         return self.driver.terminate_app(_app)
 
-    @logger
+    @loggerd
     def generate_random_string(_length=10, _letters=True, _numbers=True, _other=True):
         from random import choice
         import string
@@ -1575,7 +1576,7 @@ class Emploid:
         random_string = ''.join(choice(characters) for i in range(_length))
         return random_string
 
-    @logger
+    @loggerd
     def multi_scale_template_matching(self, main_image, template, _confidence=0.77): #WRITTEN BY CHAT-GPT
 
         # Convert images to grayscale
@@ -1646,18 +1647,18 @@ class Emploid:
         else:
             raise Exception(f"threshold ({correlation_coefficient}) is lower than {threshold_percentage}")
         
-    @logger
+    @loggerd
     def get_methods(self):
         methods = [method for method in dir(Emploid) if callable(getattr(Emploid, method))]
         methods = [method for method in methods if not method.startswith("__")]
         return methods
     
-    @logger
+    @loggerd
     def print_methods(self):
         methods = self.get_methods()
         for method in methods: print(methods.index(method), method)
 
-    @logger
+    @loggerd
     def test_chance(self, _probability): #tests the chance of execution for actions
 
         _probability = int(_probability)
@@ -1668,7 +1669,7 @@ class Emploid:
             return True
         return False
 
-    @logger
+    @loggerd
     def add_action(self, _action=None, _value=None, _target=None, _chance=100, _priority=0): #adds an action to the LOCAL ACTIONS list (self.actions). This is used on imported actions from actions.json and not on CLOUD ACTIONS (which are passed to run_action() directly and are executed immediately)
         #imported from my FBBM module for facebook automation
         raise Exception("not supported yet.")
@@ -1676,7 +1677,7 @@ class Emploid:
 
         self.show(f"action {_action} ({_value}) added to {self.email}.")
         
-    @logger
+    @loggerd
     def import_local_actions(self):
 
         #imported from my FBBM module for facebook automation
@@ -1698,7 +1699,7 @@ class Emploid:
         show(f"{len(self.actions)} Local actions imported")
         
 
-    @logger
+    @loggerd
     def generate_vip_actions(self): #generates actions for profiles, pages and groups in VIP list
 
         #imported from my FBBM module for facebook automation
@@ -1741,7 +1742,7 @@ class Emploid:
 
         show(f"{len(self.actions)} vip actions generated")
 
-    @logger
+    @loggerd
     def get_cloud_actions(self):
         #imported from my FBBM module for facebook automation
         raise Exception("not supported yet.")
@@ -1757,7 +1758,7 @@ class Emploid:
             prioritized_actions = None
             pass
 
-    @logger
+    @loggerd
     def load_extension(self, _extension):
         """adds an extension from a file to the running chrome profile."""
         #imported from my FBBM module for facebook automation
@@ -1772,7 +1773,7 @@ class Emploid:
         #     self.get()
         # self.promise(_func=func_, _tooltip="getting link", _tries=100, _delay=3)
 
-    @logger
+    @loggerd
     def activate_vpn(self):
         #imported from my FBBM module for facebook automation
         # raise Exception("not supported yet.")
@@ -1977,7 +1978,7 @@ class Emploid:
         else:
             print("VPN has not been loaded.")
 
-    @logger
+    @loggerd
     def get_generated_image(self, _img_name="img.png"):
         #imported from my FBBM module for facebook automation
         self.show("get generated image from https://www.generatormix.com/random-image-generator")
@@ -2006,7 +2007,7 @@ class Emploid:
 
         return _img_name
 
-    @logger
+    @loggerd
     def get_generated_face(self):
         #imported from my FBBM module for facebook automation
         self.get("https://this-person-does-not-exist.com/en")
@@ -2027,7 +2028,7 @@ class Emploid:
 
         self.promise(_func=func_, _args=img_name, _tooltip="get category", _delay=1, _tries=10)
 
-    @logger
+    @loggerd
     def grab_file(self, _link="NONE", _name="NONE"): #grab file from link (currently used to grab pictures)
         #imported from my FBBM module for facebook automation
         print("file link:", _link)
@@ -2050,18 +2051,18 @@ class Emploid:
 
         return self.promise(_func=func_, _args=args, _tooltip="grab file from link")
 
-    @logger
+    @loggerd
     def test_ip(self): 
         """get the PUBLIC IP of the device through an online service or JSON request"""
         return tls.f_read(self.grab_file('http://lumtest.com/myip.json', "myip.json"))
 
-    @logger
+    @loggerd
     def execute_javascript(self, _script, *_params):
         if(self.driver_type==SETTINGS_USE_SELENIUM):
             return self.driver.execute_script(_script, *_params)
         raise Exception("not supported for this driver type.")
     
-    @logger
+    @loggerd
     def highlight(self, _elm, _color="red"): #imported from my FBBM module for facebook automation
         """highlights a web ``_elm`` with acceptable CSS ``_col``."""
 
@@ -2082,23 +2083,19 @@ class Emploid:
 
         return tab_name
 
-    @logger
+    @loggerd
     def close_tab(self, _tab):
         """closes a tab.\ndo NOT use on a window with a single tab otherwise the browser will close entirely and you'll receive an error."""
         self.driver.execute_script("window.close(arguments[0]);", _tab)
 
-        # for tab in self.driver.window_handles:
-        #     if(tab==_tab):
-        #         self.close_tab(tab)
-
-    @logger
+    @loggerd
     def select_tab(self, _tab):
         """selects an open tab so that further actions are done on the web page open in that tab."""
         for tab in self.driver.window_handles:
             if tab==_tab:
                 self.driver.switch_to.window(_tab)
 
-    @logger
+    @loggerd
     def catch_extension_error(self):
         """used inside of ``activate_vpn``"""
         def func_(self):
@@ -2109,13 +2106,13 @@ class Emploid:
                     self.user.kill()
         self.promise(_func=func_, _tooltip="check if extension blocked by chrome", _tries=10, _delay=0, _noprint=True)
 
-    @logger
+    @loggerd
     def pause(self):
         """pauses the program until a key is pressed in the CMD."""
-        print("\n-----------------------------------\nemploid is paused. press any key continue.\n-----------------------------------\n")
+        self.show("emploid is paused. press any key to continue.")
         input()
 
-    @logger
+    @loggerd
     def wait(self, _seconds):
         """waits for a number of seconds while displaying a timer in the CMD"""
         for i in range(0, _seconds):
