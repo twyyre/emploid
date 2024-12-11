@@ -50,6 +50,8 @@ from selenium.webdriver.support.ui import Select #used to deal with select HTML 
 
 #my modules
 from emploid.constants import *
+# from driver import EmploidDriver
+from emploid.driver import init_emploid_driver
 import emploid.tools as tls
 from emploid.scribe import Scribe
 # from taskman import Taskman
@@ -148,14 +150,16 @@ class Emploid:
         ):
 
         self.file_path = os.path.dirname(os.path.abspath(__file__))
-
+        self.driver_type = _driver_type
         self.create_environment_directory = False
         self.create_logs_directory = False
+        self.log_path = "./"
         self.create_reports_directory = False
+        self.report_path = "./"
         self.load_entities = False
         self.log_to_db = _log_to_db
         self.logging = False
-
+        self.driver = init_emploid_driver(SETTINGS_USE_SELENIUM) #DETERMINE DRIVER TYPE
         #SET REPORT PATH-------------------------------------------
         if(self.create_reports_directory):
             self.report_path = _report_path
@@ -206,10 +210,7 @@ class Emploid:
         # if(self.create_environment_directory):
         #     if(not os.path.exists(self.constants_path)):
         #         tls.f_write(_filename=self.constants_path, _content="#here lies the constants")
-
-        self.driver_type = _driver_type if _driver_type is not None else SETTINGS_USE_PYAUTOGUI
         #----------------------------------------------------------
-
 
         # if(self.driver_type==SETTINGS_USE_APPIUM):
         #     self.flutter_console = self.taskman.start_task("flutter_console.py")
@@ -231,8 +232,8 @@ class Emploid:
         self.start_time = time.perf_counter()
         self.end_time = None
 
-        self.scribe = Scribe(_report_path=self.report_path)
-        self.scribe.new_page("emploid report")
+        # self.scribe = Scribe(_report_path=self.report_path)
+        # self.scribe.new_page("emploid report")
         self.request_delay = _request_delay
         
         self.internal_path = "elements/"
@@ -268,25 +269,6 @@ class Emploid:
         # except Exception as e:
         #     self.show("could not connect to DB.")
 
-        
-        #DETERMINE DRIVER TYPE-------------------------------------
-        self.driver = None
-        if (self.driver_type==SETTINGS_USE_APPIUM): 
-            self.driver = AppiumDriver 
-            self.keys = Keys
-        elif (self.driver_type==SETTINGS_USE_SELENIUM): 
-            self.driver = self.determine_browser() 
-            self.keys = Keys
-        elif (self.driver_type==SETTINGS_USE_PYAUTOGUI): 
-            self.driver = None 
-            self.keys = self.pa.KEYBOARD_KEYS
-            self.set_failsafe(False)
-            self.set_delay(0.2)
-            self.element_count = 0
-            self.steps = []
-        #----------------------------------------------------------
-
-
         # self.average_scroll_distance = 50
 
         # if(self.screen_get_size()!=(1920, 1080)): #this is no longer needed because elements now can be detected regardless of resolution
@@ -296,7 +278,6 @@ class Emploid:
         if(self.load_entities):
             load_entities_function = self.load_elements if self.driver_type==SETTINGS_USE_PYAUTOGUI else None #self.load_identifiers
             load_entities_function()
-            
         #----------------------------------------------------------
 
         # if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
@@ -307,8 +288,7 @@ class Emploid:
         # self.beholder = self.taskman.start_task("record.py")
 
         #APPIUM CONNECT--------------------------------------------
-        if(self.driver_type==SETTINGS_USE_APPIUM and self.autoconnect):
-            self.appium_connect()
+        # self.appium_connect() #should be migrated to driver class
         #----------------------------------------------------------
             
         self.show("started")
@@ -412,195 +392,8 @@ class Emploid:
     
     @loggerd
     def determine_browser(self):
-
-        import selenium.common.exceptions
-
-        try:
-            
-            if(self.browser_type==BROWSER_TYPE_CHROME):
-
-                #automatically update chromedriver
-                # self.show("Checking for Chromedriver updates...")
-
-                # try:
-                #     import chromedriver_autoinstaller
-                #     chromedriver_autoinstaller.install()
-                # except Exception as e:
-                #     print("could not check for chromedriver updates.")
-                
-                if platform.system()=="Windows":
-                    
-                    from subprocess import CREATE_NO_WINDOW
-<<<<<<< HEAD
-                    # self.driver_path = "drivers/chromedriver.exe"
-                    # self.show("chromedriver path:", self.driver_path )
-=======
-                    self.driver_path = "drivers/chromedriver.exe"
-                    self.show("chromedriver path:", self.file_path)
->>>>>>> a1047ea8b9bdf95d79bd01b7a2a800e1995af0f7
-                    self.service = Service()#executable_path=self.driver_path)#self.file_path+'..\s_py.exe') 
-                    self.service.creationflags = CREATE_NO_WINDOW
-
-                #chrome options set up  --------------------------------------------------------------------------
-                self.chrome_options = chromeOptions()
-                # chrome_options.add_argument("user-data-dir=C:\\Users\\Zarqa Alyamama-2021\\AppData\\Local\\Google\\Chrome\\User Data\\Default")
-
-                #run in incognito browser window---------------------------
-                if(self.incognito):
-                    self.chrome_options.add_argument("--incognito")
-                    self.show("incognito mode activated")
-                #----------------------------------------------------------
-
-
-                #whether to run in headless mode or with visible browser window
-                if(self.headless):
-                    self.chrome_options.add_argument("--headless")
-                    self.show("incognito mode activated")
-
-                #----------------------------------------------------------
-                
-
-                self.chrome_options.add_argument('--disable-gpu')  # og comment : Last I checked this was necessary.
-                # self.chrome_options.add_argument("--no-sandbox")
-                self.chrome_options.add_argument("--lang=en-US") #make sure browser language is english so that text is recognized
-                self.chrome_options.add_argument(f"--window-size={self.window_width},{self.window_height}") #set window size
-                self.chrome_options.add_argument('--window-position=400,000') #set window position on screen
-                # self.chrome_options.add_argument("--useAutomationExtension=false")
-                # self.chrome_options.add_argument("--enable-automation")
-                # self.chrome_options.add_argument("--test-type=browser")
-                # self.chrome_options.add_argument("--disable-plugins")
-                # self.chrome_options.add_argument("--disable-infobars")
-                self.chrome_options.add_argument("--extensions_install_verfication=false")
-                # self.chrome_options.add_argument("--disable_extensions=true")
-                #-----------------------------------------------------------------------------------------------
-
-
-                #USER PROFILE (CHROME):
-                # self.user_profile = True
-                # if(self.user_profile != False and self.user_profile != None):
-
-                   
-                #     self.show("LOAD USER PROFILE")
-
-                #     # if(self.email):
-                #     #     # print("email is true")
-                #     #     # input()
-                #     #     user_profile = "lypybot_"+str(self.email)
-                #     # else:
-                #     #     user_profile = self.user_profile 
-                    
-                #     # print("user profile:", user_profile)
-                #     # # input()
-
-                #     user_profile = "lypybot_"+str(self.email)
-                #     self.chrome_options.add_argument(f"user-data-dir=C:\\Users\\lypybot\\AppData\\Local\\Google\\Chrome\\User Data\\{user_profile}") #will make a program that automatically deletes user profiles later
-                    
-                if(self.vpn):
-
-                    try:
-                        extension_name = "freevpnExtension"
-                        self.chrome_options.add_extension(f"extensions/{extension_name}.crx")
-                        self.vpn_loaded = True
-                        self.show("freevpnExtension loaded")
-                        
-                    except Exception as e:
-                        self.vpn_loaded = False
-                        print(e)
-
-                #----------------------------------------------------------
-                if platform.system() == "Linux":
-
-                    raise Exception("LINUX is not supported at the moment.")
-                    print("\n set to linux driver")
-                    # self.driver = webdriver.Chrome(service= self.service, options= self.chrome_options, executable_path=os.environ.get("CHROMEDRIVER_PATH"))
-                    self.driver = SeleniumDriver.Chrome()
-                    
-                if platform.system() == "Windows":
-
-                    self.show("set to windows driver.")
-                    return SeleniumDriver.Chrome(options=self.chrome_options, service=self.service)
-                #----------------------------------------------------------
-
-            elif(self.browser_type==BROWSER_TYPE_TOR):
-                raise Exception("tor is not supported at the moment.")
-                print("USING TOR BROWSER")
-                #TOR BROWSER EXAMPLE
-                from selenium import webdriver
-                from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-                from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-
-                # binary = FirefoxBinary(r"C:\Users\<Windows User>\Desktop\Tor Browser\Browser\firefox.exe")
-                # profile = FirefoxProfile(r"C:\Users\<Windows User>\Desktop\Tor Browser\Browser\TorBrowser\Data\Browser\profile.default")
-
-                # driver = webdriver.Firefox(profile, binary)
-                # driver.get("http://stackoverflow.com")
-
-
-            elif(self.browser_type==BROWSER_TYPE_FIREFOX):
-
-                raise Exception("Firefox is not supported at the moment.")
-                print("USING FIREFOX BROWSER")
-                from subprocess import CREATE_NO_WINDOW
-                self.service = Service(getcwd()+"//drivers//geckodriver.exe") 
-                self.service.creationflags = CREATE_NO_WINDOW
-
-                #firefox options set up
-                self.firefox_options = FirefoxOptions()
-
-                #firefox preference reference http://kb.mozillazine.org/Category:Preferences
-                #firefox vepn extension https://addons.mozilla.org/en-US/firefox/addon/veepn-free-fast-security-vpn/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search
-
-                #run in incognito browser window
-                if(self.incognito):
-                    self.firefox_options.add_argument("--incognito")
-
-                #whether to run in headless mode or with visible browser window
-                if(self.headless):
-                    self.firefox_options.add_argument("--headless")
-
-                # self.firefox_options.set_preference("Browser.display.screen resolution", -1)
-                self.firefox_options.add_argument("--width=450")
-                self.firefox_options.add_argument("--height=600")
-
-                from selenium import webdriver
-                from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-                from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-
-                # binary = FirefoxBinary(r"C:\Users\<Windows User>\Desktop\Tor Browser\Browser\firefox.exe")
-
-                self.firefox_profile = FirefoxProfile(getcwd()+f"/fbb_data/browser_profiles/firefox/profile.default")#r"C:\Users\hp\AppData\Roaming\Mozilla\Firefox\Profiles")
-                self.firefox_binary = FirefoxBinary()
-
-                # Ensure mobile-friendly view for parsing
-                useragent = "Mozilla/5.0 (Linux; Android 8.0.0; Pixel 2 XL Build/OPD1.170816.004) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Mobile Safari/537.36"
-
-                firefox_capabilities = webdriver.DesiredCapabilities.FIREFOX
-                firefox_capabilities['marionette'] = True
-
-                #Firefox
-                self.firefox_profile.set_preference("general.useragent.override", useragent)
-
-                self.firefox_profile.DEFAULT_PREFERENCES["frozen"]["browser.link.open_newwindow"] = 3 #this fixes new tabs opening as new windows when using firefox profiles
-                self.driver = webdriver.Firefox(firefox_profile=self.firefox_profile, firefox_binary=self.firefox_binary, options=self.firefox_options)
-
-                try:
-                    self.driver.install_addon(getcwd()+"/fbb_data/extensions/freevpnExtension.xpi", temporary=False)
-                    self.vpn_loaded = True
-                except Exception as e:
-                    print(e)
-                    pause()
-
-                
-
-                # self.driver.set_window_size(self.window_width, self.window_height)
-
-        except selenium.common.exceptions.SessionNotCreatedException as e:
-
-            self.show("Driver error")
-            self.show(e)
-
+        self.driver.determine_browser()
         return self.driver
-    
     
     @loggerd
     def get(self, _url="", _tooltip="get link", _scribble=False):
@@ -667,17 +460,11 @@ class Emploid:
         else:
             raise Exception("driver type not supported")
     
-<<<<<<< HEAD
-    # @loggerd
-    # def load_identifiers(self):
-    #     import emploid.identifiers as id
-=======
-    @logger
+    @loggerd
     def load_identifiers(self): #for future use
         # import emploid.identifiers as id
         pass
         
->>>>>>> a1047ea8b9bdf95d79bd01b7a2a800e1995af0f7
 
     # @loggerd
     # def get_steps(self) -> list[str]:
@@ -1180,7 +967,6 @@ class Emploid:
             if "//" in _elm.lower(): _mode=SeleniumBy.XPATH
             return self.find_element(_elm, _method=_mode)
         if(self.driver_type==SETTINGS_USE_SELENIUM):
-            self.show("in locate function")
             # print("element type:", _elm)
             if "/" in _elm.lower(): _mode=SeleniumBy.XPATH
             return self.find_element(_elm, _method=_mode)
@@ -2133,7 +1919,7 @@ class Emploid:
             print(f"waiting ({_seconds - i}) seconds...")
             sleep(1)
             
-    @logger
+    @loggerd
     def refresh(self):
         if(self.driver_Type==SETTINGS_USE_SELENIUM):
             self.driver.refresh()
