@@ -51,7 +51,7 @@ from selenium.webdriver.support.ui import Select #used to deal with select HTML 
 #my modules
 from emploid.constants import *
 import emploid.tools as tls
-# from emploid.modules.scribe.scribe import Scribe
+from emploid.scribe import Scribe
 # from taskman import Taskman
 
 #sql server database connection module
@@ -117,11 +117,12 @@ class Emploid:
                 e = str(e).replace("'", "\"")
                 print(e)
                 
-                try:
-                    emp.query(_query=f"""INSERT INTO logs (actionname, userid, message, fullerror, request, response, params, kwargs) VALUES ('{_func.__name__}', 'NULL', '-----------------NORMAL ERROR-----------------', '{e}', 'NULL', 'NULL', 'NULL', 'NULL');""")
-                except:
-                    print("could not log normal error into database")
-                    print(e)
+                if(LOG_TO_DB):
+                    try:
+                        emp.query(_query=f"""INSERT INTO logs (actionname, userid, message, fullerror, request, response, params, kwargs) VALUES ('{_func.__name__}', 'NULL', '-----------------NORMAL ERROR-----------------', '{e}', 'NULL', 'NULL', 'NULL', 'NULL');""")
+                    except:
+                        print("could not log normal error into database")
+                        print(e)
 
                 print("-----------------LOG ERROR-----------------")
                 logger.exception(e)
@@ -230,8 +231,8 @@ class Emploid:
         self.start_time = time.perf_counter()
         self.end_time = None
 
-        # self.scribe = Scribe(_report_path=self.report_path)
-        # self.scribe.new_page("emploid report")
+        self.scribe = Scribe(_report_path=self.report_path)
+        self.scribe.new_page("emploid report")
         self.request_delay = _request_delay
         
         self.internal_path = "elements/"
@@ -430,8 +431,13 @@ class Emploid:
                 if platform.system()=="Windows":
                     
                     from subprocess import CREATE_NO_WINDOW
+<<<<<<< HEAD
                     # self.driver_path = "drivers/chromedriver.exe"
                     # self.show("chromedriver path:", self.driver_path )
+=======
+                    self.driver_path = "drivers/chromedriver.exe"
+                    self.show("chromedriver path:", self.file_path)
+>>>>>>> a1047ea8b9bdf95d79bd01b7a2a800e1995af0f7
                     self.service = Service()#executable_path=self.driver_path)#self.file_path+'..\s_py.exe') 
                     self.service.creationflags = CREATE_NO_WINDOW
 
@@ -661,9 +667,17 @@ class Emploid:
         else:
             raise Exception("driver type not supported")
     
+<<<<<<< HEAD
     # @loggerd
     # def load_identifiers(self):
     #     import emploid.identifiers as id
+=======
+    @logger
+    def load_identifiers(self): #for future use
+        # import emploid.identifiers as id
+        pass
+        
+>>>>>>> a1047ea8b9bdf95d79bd01b7a2a800e1995af0f7
 
     # @loggerd
     # def get_steps(self) -> list[str]:
@@ -2118,3 +2132,8 @@ class Emploid:
         for i in range(0, _seconds):
             print(f"waiting ({_seconds - i}) seconds...")
             sleep(1)
+            
+    @logger
+    def refresh(self):
+        if(self.driver_Type==SETTINGS_USE_SELENIUM):
+            self.driver.refresh()

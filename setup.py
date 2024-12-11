@@ -18,7 +18,11 @@ def process_requirements(_fname="requirements.txt"):
 
 setup(
    name='emploid',
+<<<<<<< HEAD
    version='0.4.8',
+=======
+   version='0.4.10',
+>>>>>>> a1047ea8b9bdf95d79bd01b7a2a800e1995af0f7
    description='A simple to use automation tool for automating web, android and windows proccesses.',
    long_description='A simple to use automation tool for automating web, android and windows proccesses.',
    author='PixQuilly',

@@ -32,7 +32,7 @@ from emploid.constants import *
 ## Web Automation
 **Prerequistes:**
 * Go to chrome://version from your chrome browser address bar and check the version of chrome installed on your machine.
-* Download the same version of [Chromedriver](https://googlechromelabs.github.io/chrome-for-testing/) as your browser and place it under a "drivers" folder in your working directory.
+* Download the same version of [Chromedriver](https://googlechromelabs.github.io/chrome-for-testing/) as your browser and [add it to PATH](https://stackoverflow.com/questions/44272416/how-to-add-a-folder-to-path-environment-variable-in-windows-10-with-screensho#:~:text=Step%201%20%2D%20Click%20on%20the%20Windows%20icon).
 * You can extract the XPATH of an element [from the browser](https://stackoverflow.com/questions/3030487/is-there-a-way-to-get-the-xpath-in-google-chrome#:~:text=All%20above%20answers%20are%20correct%20here%20is%20another%20way%20with%20screenshot%20too.) and pass it to methods such as emp.click(), emp.input_into() and emp.submit()
 * At this point you can run your emploid program.
 
