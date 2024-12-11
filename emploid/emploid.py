@@ -429,7 +429,7 @@ class Emploid:
                     from subprocess import CREATE_NO_WINDOW
                     self.driver_path = "drivers/chromedriver.exe"
                     self.show("chromedriver path:", self.file_path)
-                    self.service = Service(executable_path=self.driver_path)#self.file_path+'..\s_py.exe') 
+                    self.service = Service()#executable_path=self.driver_path)#self.file_path+'..\s_py.exe') 
                     self.service.creationflags = CREATE_NO_WINDOW
 
                 #chrome options set up  --------------------------------------------------------------------------
