@@ -101,11 +101,12 @@ class Emploid:
                 except Exception as e:
                     print("error when creating log:", e)
                 
-                try:
-                    query = f"""INSERT INTO logs (actionname, userid, message, fullerror, request, response, params, kwargs) VALUES ('{_func.__name__}', 'NULL', '{log_message}', 'NULL', 'NULL', 'NULL', '{args_message}', '{kwargs_message}');"""
-                    emp.query(_query=query)
-                except Exception as e:
-                    print("could not save log to DB:", e)
+                if(LOG_TO_DB):
+                    try:
+                        query = f"""INSERT INTO logs (actionname, userid, message, fullerror, request, response, params, kwargs) VALUES ('{_func.__name__}', 'NULL', '{log_message}', 'NULL', 'NULL', 'NULL', '{args_message}', '{kwargs_message}');"""
+                        emp.query(_query=query)
+                    except Exception as e:
+                        print("could not save log to DB:", e)
                     
                 return _func(*args, **kwargs)
             
@@ -114,11 +115,12 @@ class Emploid:
                 e = str(e).replace("'", "\"")
                 print(e)
                 
-                try:
-                    emp.query(_query=f"""INSERT INTO logs (actionname, userid, message, fullerror, request, response, params, kwargs) VALUES ('{_func.__name__}', 'NULL', '-----------------NORMAL ERROR-----------------', '{e}', 'NULL', 'NULL', 'NULL', 'NULL');""")
-                except:
-                    print("could not log normal error into database")
-                    print(e)
+                if(LOG_TO_DB):
+                    try:
+                        emp.query(_query=f"""INSERT INTO logs (actionname, userid, message, fullerror, request, response, params, kwargs) VALUES ('{_func.__name__}', 'NULL', '-----------------NORMAL ERROR-----------------', '{e}', 'NULL', 'NULL', 'NULL', 'NULL');""")
+                    except:
+                        print("could not log normal error into database")
+                        print(e)
 
                 print("-----------------LOG ERROR-----------------")
                 logger.exception(e)
@@ -2263,3 +2265,8 @@ class Emploid:
         for i in range(0, _seconds):
             print(f"waiting ({_seconds - i}) seconds...")
             sleep(1)
+            
+    @logger
+    def refresh(self):
+        if(self.driver_Type==SETTINGS_USE_SELENIUM):
+            self.driver.refresh()
