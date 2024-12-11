@@ -21,7 +21,6 @@ class Scribe:
         
         self.fill_argument("page_name", "report", self.f)
         self.fill_argument("page_date", self.get_time(), self.f)
-
         self.fill_argument("column_1", "#", self.f)
         self.fill_argument("column_2", "automated step", self.f)
         self.fill_argument("column_3", "expected result", self.f)

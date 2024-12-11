@@ -49,7 +49,7 @@ from selenium.webdriver.support.ui import Select #used to deal with select HTML 
 #my modules
 from emploid.constants import *
 import emploid.tools as tls
-# from emploid.modules.scribe.scribe import Scribe
+from emploid.scribe import Scribe
 # from taskman import Taskman
 
 #sql server database connection module
@@ -229,8 +229,8 @@ class Emploid:
         self.start_time = time.perf_counter()
         self.end_time = None
 
-        # self.scribe = Scribe(_report_path=self.report_path)
-        # self.scribe.new_page("emploid report")
+        self.scribe = Scribe(_report_path=self.report_path)
+        self.scribe.new_page("emploid report")
         self.request_delay = _request_delay
         
         self.internal_path = "elements/"
@@ -734,9 +734,10 @@ class Emploid:
             raise Exception("driver type not supported")
     
     @logger
-    def load_identifiers(self):
+    def load_identifiers(self): #for future use
+        # import emploid.identifiers as id
+        pass
         
-        import emploid.identifiers as id
 
     @logger
     def get_steps(self) -> list[str]:
