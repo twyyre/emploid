@@ -1,7 +1,7 @@
 from emploid.constants import *
 
 def determine_driver_type(_driver_type):
-    if (_driver_type==SETTINGS_USE_APPIUM): 
+    if (_driver_type==SETTINGS_USE_APPIUM):
         #APPIUM IMPORTS
         from appium import webdriver as AppiumDriver
         from appium.webdriver.common.appiumby import AppiumBy as By
@@ -11,7 +11,7 @@ def determine_driver_type(_driver_type):
         from appium.webdriver.extensions.android.nativekey import AndroidKey as ak
         keys = Keys
         return AppiumDriver
-    elif (_driver_type==SETTINGS_USE_SELENIUM): 
+    elif (_driver_type==SETTINGS_USE_SELENIUM):
         #SELENIUM IMPORTS
         from selenium import webdriver as SeleniumDriver
         from selenium.webdriver.support import expected_conditions as SeleniumConditions
@@ -31,7 +31,7 @@ def determine_driver_type(_driver_type):
         from selenium.webdriver.chrome.service import Service
         from selenium.webdriver.chrome.options import Options as chromeOptions
         return SeleniumDriver.Chrome
-    elif (_driver_type==SETTINGS_USE_PYAUTOGUI): 
+    elif (_driver_type==SETTINGS_USE_PYAUTOGUI):
         #PYAUTOGUI IMPORTS
         import pyautogui as pa
         import pyperclip as clip

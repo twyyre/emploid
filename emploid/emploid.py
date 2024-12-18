@@ -50,7 +50,6 @@ from selenium.webdriver.support.ui import Select #used to deal with select HTML 
 
 #my modules
 from emploid.constants import *
-# from driver import EmploidDriver
 from emploid.driver import init_emploid_driver
 import emploid.tools as tls
 from emploid.scribe import Scribe
@@ -58,35 +57,35 @@ from emploid.scribe import Scribe
 
 #sql server database connection module
 import pyodbc
+from emploid.logdec import decorator_wrapper
 
 logger = logging.getLogger(__name__)
 
-class Emploid:
+class Emploid():
 
-    #DECORATOR FOR LOGGING FUNCTION CALLS----------------------
     @staticmethod
     def loggerd(_func, *args):
+        """a decorator for logging and error handling."""
         def wrapper(*args, **kwargs):
             try:
                 emp = args[0]
-                
                 try:
                     #CREATE LOG FILE-------------------------------------------
-                    # emp.create_logs_directory = True
-                    # emp.log_path = "logs"
-                    # if(emp.create_logs_directory):
-                    #     year = datetime.datetime.now().year
-                    #     month = datetime.datetime.now().month
-                    #     day = datetime.datetime.now().day
-                    #     hour = datetime.datetime.now().hour
-                    #     minute = datetime.datetime.now().minute
-                    #     second = datetime.datetime.now().second
-                    #     log_filename = f"{emp.log_path}/internal_log {year}-{month}-{day}-{hour}-{minute}-{second}.log"
+                    if(emp.create_logs_directory):
+                        year = datetime.datetime.now().year
+                        month = datetime.datetime.now().month
+                        day = datetime.datetime.now().day
+                        hour = datetime.datetime.now().hour
+                        minute = datetime.datetime.now().minute
+                        second = datetime.datetime.now().second
+                        log_filename = f"{emp.log_path}/internal_log {year}-{month}-{day}-{hour}-{minute}-{second}.log"
 
-                    #     tls.f_write(_filename=log_filename, _content="")
+                        tls.f_write(_filename=log_filename, _content="")
                         
-                    #     logging.basicConfig(filename=log_filename, encoding='utf-8', format='%(asctime)s %(message)s', level=logger.INFO)
+                        logging.basicConfig(filename=log_filename, encoding='utf-8', format='%(asctime)s %(message)s', level=logger.INFO)
                     #----------------------------------------------------------
+                    print("log dir created")
+                    input()
                     log_message = str(f"emploid started '{_func.__name__}'").replace("'", "\"")
                     args_message = ""
                     kwargs_message = ""
@@ -128,10 +127,11 @@ class Emploid:
 
                 print("-----------------LOG ERROR-----------------")
                 logger.exception(e)
-                
+                    
         return wrapper
+        #----------------------------------------------------------
+    
     #----------------------------------------------------------
-
     
     @loggerd
     def __init__(
@@ -144,6 +144,8 @@ class Emploid:
             _request_delay=REQUEST_DELAY,
             # _user_profile=None,
             _browser_type=BROWSER_TYPE_CHROME,
+            _maximized=False,
+            _window_size=None,
             _report_path=None,
             _log_path=None,
             _log_to_db=False
@@ -152,49 +154,41 @@ class Emploid:
         self.file_path = os.path.dirname(os.path.abspath(__file__))
         self.driver_type = _driver_type
         self.create_environment_directory = False
-        self.create_logs_directory = False
-        self.log_path = "./"
+        self.log_path = _log_path
+        self.create_logs_directory = True if self.log_path else False
         self.create_reports_directory = False
         self.report_path = "./"
         self.load_entities = False
         self.log_to_db = _log_to_db
         self.logging = False
-        self.driver = init_emploid_driver(SETTINGS_USE_SELENIUM) #DETERMINE DRIVER TYPE
+        self.driver = init_emploid_driver(self.driver_type) #Init Driver instance
+        
         #SET REPORT PATH-------------------------------------------
         if(self.create_reports_directory):
-            self.report_path = _report_path
-            if(not self.report_path):
-                self.report_path = 'reports'
             if not os.path.exists(self.report_path):
                 os.makedirs(self.report_path)
         #----------------------------------------------------------
-        
 
         #SET LOG PATH----------------------------------------------
         if(self.create_logs_directory):
-            self.log_path = _log_path
-            if(not self.log_path):
-                self.log_path = 'logs'
             if not os.path.exists(self.log_path):
                 os.makedirs(self.log_path)
         #----------------------------------------------------------
 
+        #CREATE LOG FILE-------------------------------------------
+        # if(self.create_logs_directory):
+        #     year = datetime.datetime.now().year
+        #     month = datetime.datetime.now().month
+        #     day = datetime.datetime.now().day
+        #     hour = datetime.datetime.now().hour
+        #     minute = datetime.datetime.now().minute
+        #     second = datetime.datetime.now().second
+        #     log_filename = f"{self.log_path}/internal_log {year}-{month}-{day}-{hour}-{minute}-{second}.log"
 
-        # #CREATE LOG FILE-------------------------------------------
-        if(self.create_logs_directory):
-            year = datetime.datetime.now().year
-            month = datetime.datetime.now().month
-            day = datetime.datetime.now().day
-            hour = datetime.datetime.now().hour
-            minute = datetime.datetime.now().minute
-            second = datetime.datetime.now().second
-            log_filename = f"{self.log_path}/internal_log {year}-{month}-{day}-{hour}-{minute}-{second}.log"
-
-            tls.f_write(_filename=log_filename, _content="")
+        #     tls.f_write(_filename=log_filename, _content="")
             
-            logger.basicConfig(filename=log_filename, encoding='utf-8', format='%(asctime)s %(message)s', level=logger.INFO)
+        #     logger.basicConfig(filename=log_filename, encoding='utf-8', format='%(asctime)s %(message)s', level=logger.INFO)
         # #----------------------------------------------------------
-
 
         #CREATE ENVIRONMENT DIRECTORY------------------------------
         # if(self.create_environment_directory):
@@ -204,7 +198,6 @@ class Emploid:
         #     if not os.path.exists(self.environment_path):
         #         os.makedirs(self.environment_path)
         #----------------------------------------------------------
-        
 
         #CREATE CONSTANTS.PY---------------------------------------
         # if(self.create_environment_directory):
@@ -221,7 +214,7 @@ class Emploid:
         
         # self.taskman = Taskman()
         
-        self.by = SeleniumBy
+        self.by = self.driver.get_by()
         self.pa = pa
         self.cv = cv
         self.np = np
@@ -258,7 +251,6 @@ class Emploid:
         self.database_password = DATABASE_USER_PASSWORD
         #----------------------------------------------------------
 
-        
         # try:
         #     print("connecting to database...")
         #     self.db_connection = self.db_connect()
@@ -273,12 +265,6 @@ class Emploid:
 
         # if(self.screen_get_size()!=(1920, 1080)): #this is no longer needed because elements now can be detected regardless of resolution
         #     raise Exception("resolution is not supported. Screen Resolution must be (1920x1080).")
-            
-        #LOAD ENTITIES---------------------------------------------
-        if(self.load_entities):
-            load_entities_function = self.load_elements if self.driver_type==SETTINGS_USE_PYAUTOGUI else None #self.load_identifiers
-            load_entities_function()
-        #----------------------------------------------------------
 
         # if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
         #     self.load_elements()
@@ -286,12 +272,78 @@ class Emploid:
         #     self.load_identifiers()
         # self.taskman = Taskman()
         # self.beholder = self.taskman.start_task("record.py")
-
-        #APPIUM CONNECT--------------------------------------------
-        # self.appium_connect() #should be migrated to driver class
-        #----------------------------------------------------------
-            
+        
         self.show("started")
+        
+    @loggerd
+    def init(self):
+        pass
+        
+    @loggerd
+    def set_driver_type(self, _driver_type):
+        self.driver_type = _driver_type
+        return self
+    @loggerd
+    def set_autoconnect(self):
+        self.autoconnect = True
+        return self
+    @loggerd
+    def set_headless(self):
+        self.headless = True
+        return self
+    @loggerd
+    def set_incognito(self):
+        self.incognito = True
+        return self
+    @loggerd
+    def set_vpn(self):
+        self.vpn = True
+        return self
+    @loggerd
+    def set_request_delay(self, _delay):
+        self.request_delay = _delay
+        return self
+    @loggerd
+    def set_user_profile(self, _user_profile):
+        self.user_profile = _user_profile
+        return self
+    @loggerd
+    def set_browser_type(self, _browser_type):
+        self.browser_type = _browser_type
+        return self
+    @loggerd
+    def set_maximized(self):
+        self.maximized = True
+        return self
+    @loggerd
+    def set_window_size(self, _window_size):
+        self.window_size = _window_size
+        return self
+    @loggerd
+    def set_report_path(self, _report_path):
+        self.report_path = _report_path
+        return self
+    @loggerd
+    def set_log_path(self, _log_path):
+        self.log_path = _log_path
+        return self
+    @loggerd
+    def set_log_to_db(self):
+        self.log_to_db = True
+        return self
+    @loggerd
+    def set_load_entities(self):
+        self.load_entities = True
+        return self
+
+    @loggerd
+    def load_entities_function(self):
+        """This function is for loading entities froma file. Entities can be Xpaths or PIL images or anything in-between."""
+        # try:
+        #     self.load_elements if self.driver_type==SETTINGS_USE_PYAUTOGUI else None()
+        # except Exception as e:
+        #     print(e)
+        return self
 
     @loggerd
     def __del__(self):
@@ -340,6 +392,7 @@ class Emploid:
                 
         else:
             raise Exception("selected DATABASE_ENGINE is not supported.")
+        
 
     def query(self, _db_con=None, _query=""): #for some reason adding the logger decorater to this function freezes emploid from starting
         """executes a query on the database and returns the result"""
@@ -595,19 +648,7 @@ class Emploid:
     @loggerd
     def determine_entity(self, _ent):
         """determines whether passed ``_ent`` is a webelement, an xpath, a css selector, or a package name."""
-        # Check if it's a package name
-        if '.' in _ent:
-            return "Package name"
-        
-        # Check if it's an XPath expression
-        if re.match(r'^//', _ent):
-            return "XPath expression"
-        
-        # Check if it's a CSS selector
-        if re.match(r'^[.#]?[-_a-zA-Z0-9]+', _ent):
-            return "CSS selector"
-        
-        return None
+        return self.driver.determine_entity(_ent)
 
     @loggerd
     def promise_element(self, _ent, _mode=None, _tries=3, _delay=1, _confidence=0.9, _tooltip=f"promising element..."):
@@ -616,19 +657,7 @@ class Emploid:
         it can try as many ``_tries`` as possible to find the element with a ``_delay`` between each attempt.
         """
         #This function needs modification, it doesn't raise an exception when the element is not found where it should. Will look into it later.
-        if(self.driver_type==SETTINGS_USE_PYAUTOGUI):
-            is_element = isinstance(_ent, self.np.ndarray)
-            if(not is_element):
-                print(f"entity {_ent} is not an element of type {self.np.ndarray}")
-            return  self.pa.locateOnScreen(_ent) if is_element else None
-        
-        if(self.driver_type==SETTINGS_USE_SELENIUM):
-            from selenium.webdriver.remote.webelement import WebElement
-            is_element = isinstance(_ent, WebElement)
-
-        if(self.driver_type==SETTINGS_USE_APPIUM):
-            from appium.webdriver.webelement import WebElement
-            is_element = isinstance(_ent, WebElement)
+        is_element = self.driver.define_element(_ent)
 
         if(is_element):
             return _ent
@@ -677,10 +706,6 @@ class Emploid:
             self.driver.swipe(start_x, start_y, end_x, end_y, duration=800)  # you can adjust the duration as needed
             return True
         return False
-        
-    @loggerd
-    def test_func(self):
-        print("this is a test function.")
 
     @loggerd
     def swipe_down(self, _distance=500):
@@ -1872,6 +1897,7 @@ class Emploid:
                 return true;
             """, _elm, _color)
         
+    @loggerd
     def new_tab(self, link="google.com", select=False):
         """opens up a new browser tab."""
         window = self.driver.execute_script("""window.open(arguments[0],"_blank");""", link)
@@ -1923,3 +1949,8 @@ class Emploid:
     def refresh(self):
         if(self.driver_Type==SETTINGS_USE_SELENIUM):
             self.driver.refresh()
+            
+    @loggerd
+    def run(self):
+        while True:
+            pass
